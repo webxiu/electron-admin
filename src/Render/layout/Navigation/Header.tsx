@@ -1,16 +1,15 @@
-import { Dropdown, Menu, Modal, message } from 'antd';
+import { Dropdown, Menu, Modal } from 'antd';
 import React, { useEffect } from 'react';
 
-import { AppEventNames } from '~/src/Types/EventTypes';
 import { DownOutlined } from '@ant-design/icons';
 import GroupIcon from '@/Render/assets/img/icons/group_icon.png';
 import ListIcon from '@/Render/assets/img/icons/list_icon.png';
-import Nav_icon1 from '@/Render/assets/img/icons/list_icon.png';
 import PubSub from 'pubsub-js';
 import SystemController from '@/Render/components/SystemController';
 import { useHistory } from 'react-router';
 import { useInject } from '@/Render/components/Hooks';
 import { useObserver } from 'mobx-react';
+import { useTranslation } from 'react-i18next';
 
 const { SubMenu } = Menu;
 
@@ -23,6 +22,7 @@ export const Header: React.FC<Props> = (props) => {
   const { showMaximize } = props;
   const Store = useInject('Global');
   const history = useHistory();
+  const { t } = useTranslation('login');
 
   useEffect(() => {}, []);
 
@@ -34,10 +34,7 @@ export const Header: React.FC<Props> = (props) => {
     <header className="drag">
       <div className="flex just-between ui-h-100">
         <div className="flex just-center align-center app-logo">
-          <img src={Nav_icon1} width="20" alt="" className="no-drag no-select" onClick={() => history.push('/home')} />
-        </div>
-        <div className="flex flex-1 drag">
-          <div className="no-drag">{props.children}</div>
+          <img src={t('logo')} width="36" alt="" className="no-drag no-select" onClick={() => history.push('/login')} />
         </div>
         <div className="control-group">
           <div className="flex ui-h-100 just-center align-center header-right-options">
@@ -92,7 +89,7 @@ export const Header: React.FC<Props> = (props) => {
           position: relative;
           height: 52px;
           overflow: hidden;
-          background: #2b2c2d;
+          background: #4e4e4e;
         }
         .control-group {
           display: flex;

@@ -23,9 +23,12 @@ interface ElectronProcessVersions extends NodeJS.ProcessVersions {
 }
 
 declare global {
+  export const LANGUAGE: string;
   export type DirPath = string;
   export type FilePath = string;
   export namespace $$ {
+    // 全局的语言变量
+    const language: string;
     const isPro: () => boolean;
     const JoinDirWithRoot: (...dir) => string;
     const isString: (arg) => Boolean;

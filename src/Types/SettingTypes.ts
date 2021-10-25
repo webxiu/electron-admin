@@ -3,5 +3,6 @@ export type SettingTypes = {
   clickTotal: number;
   gitee: string;
   hotUpdater: boolean;
+  serverAddr: string;
   github: string;
 };

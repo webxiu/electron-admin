@@ -1,5 +1,5 @@
 {
-  "name": "voice-preprocess-tool",
+  "name": "electron-admin",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -11,8 +11,10 @@
     "tslint": "node_modules/.bin/tsc --noEmit --pretty",
     "app": "node electron-cli-service app",
     "kill": "node electron-cli-service kill",
-    "build": "cross-env NODE_ENV=production node electron-cli-service build",
-    "start": "cross-env NODE_ENV=development node electron-cli-service start",
+    "start": "cross-env NODE_ENV=development LANGUAGE=zh_CN node electron-cli-service start",
+    "build": "cross-env NODE_ENV=production LANGUAGE=zh_CN node electron-cli-service build",
+    "start:en": "cross-env NODE_ENV=development LANGUAGE=en node electron-cli-service start",
+    "build:en": "cross-env NODE_ENV=production LANGUAGE=en node electron-cli-service build",
     "test:build:ci": "cross-env BUILD_NUMBER=1015 npm run build",
     "codec:swagger": "node electron-cli-service autoService"
   },
@@ -98,7 +100,7 @@
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
     "husky": "^4.2.5",
-    "i18next": "^20.3.1",
+    "i18next": "^21.3.3",
     "json-schema": "^0.2.5",
     "less": "^3.11.1",
     "less-loader": "^6.1.0",
@@ -114,7 +116,7 @@
     "postcss-preset-env": "^6.7.0",
     "precss": "^4.0.0",
     "prettier": "^2.0.5",
-    "react-i18next": "^11.10.0",
+    "react-i18next": "^11.12.0",
     "react-refresh": "^0.8.3",
     "shelljs": "^0.8.4",
     "speed-measure-webpack-plugin": "^1.3.3",
@@ -141,8 +143,8 @@
       "public",
       "node_modules/@spk"
     ],
-    "appId": "com.voice-preprocess-tool",
-    "productName": "测试标题",
+    "appId": "com.electron-admin",
+    "productName": "海阔天空",
     "files": [
       "dist",
       "public",
@@ -176,7 +178,7 @@
       "icon": "public/assets/favicon/icons/favicon@5x.icns",
       "category": "AudioVideo",
       "target": "deb",
-      "executableName": "利剑"
+      "executableName": "海阔天空"
     },
     "nsis": {
       "oneClick": false,

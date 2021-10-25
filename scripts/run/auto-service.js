@@ -105,7 +105,7 @@ const call = (methods, __name) => {
   return ` request, InjectAbort(${__name}, config))`;
 };
 
-axios.request({ url: 'http://192.168.21.38:5002/doc/swagger/', method: 'get' }).then(({ data }) => {
+axios.request({ url: 'http://127.0.0.1:5002/doc/swagger/', method: 'get' }).then(({ data }) => {
   nativeObject = YAML.parse(data);
   for (const [key, value] of Object.entries(nativeObject.paths)) {
     let methods = Object.keys(value)[0];

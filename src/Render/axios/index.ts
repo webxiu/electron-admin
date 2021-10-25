@@ -5,11 +5,9 @@ import { ResponseErrorDesc } from '@/Render/config/response.config';
 import { message } from 'antd';
 
 const instance = axios.create({
-  baseURL: 'http://192.168.21.38:5002/',
+  baseURL: 'http://127.0.0.1:5002/',
   timeout: 1000 * 60 * 2,
-  headers: {
-    'Content-Type': 'application/json'
-  },
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: false
 });
 

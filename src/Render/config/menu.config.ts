@@ -1,37 +1,32 @@
 export type MenuItemTypes = {
-  icon: string;
-  img: string;
   key: string;
   title: string;
   path: string;
-  discription: string;
+  icon: string;
+  icon_on: string;
 };
 
 export const menuList: MenuItemTypes[] = [
   {
     key: 'preprocess',
-    title: '测试内容1',
-    path: '/navigation/preprocess',
-    icon: require('@/Render/assets/img/icons/menu_icon1.png').default,
-    img: require('@/Render/assets/img/icons/start_icon1.png').default,
-    discription: '支持对音频进行编辑、有效音提取、话者分离、声道分离、音频合并等操作'
+    title: '音频预处理',
+    path: '/home/preprocess',
+    icon: require('@/Render/assets/img/menu/menu_preprocess.png').default,
+    icon_on: require('@/Render/assets/img/menu/menu_preprocess_on.png').default
   },
   {
     key: 'cluster',
-    title: '测试内容2',
-    path: '/navigation/cluster',
-    icon: require('@/Render/assets/img/icons/menu_icon2.png').default,
-    img: require('@/Render/assets/img/icons/start_icon2.png').default,
-    discription: '把声音聚集再一起再操作、音频合并等操作'
+    title: '声纹聚类',
+    path: '/home/cluster',
+    icon: require('@/Render/assets/img/menu/menu_cluster.png').default,
+    icon_on: require('@/Render/assets/img/menu/menu_cluster_on.png').default
   },
   {
     key: 'onestop',
-    title: '测试内容3',
-    path: '/navigation/onestop',
-    icon: require('@/Render/assets/img/icons/menu_icon3.png').default,
-    img: require('@/Render/assets/img/icons/start_icon3.png').default,
-    discription:
-      '我是很长的文本, 我是很长的文本, 我是很长的文本, 我是很长的文本, 我是很长的文本, 我是很长的文本, 我是很长的文本, 我是很长的文本, 支持对音频进行编辑、有效音提取、话者分离、声道分离、音频合并等操作'
+    title: '一站式处理',
+    path: '/home/onestop',
+    icon: require('@/Render/assets/img/menu/menu_onestop.png').default,
+    icon_on: require('@/Render/assets/img/menu/menu_onestop_on.png').default
   }
 ];
 

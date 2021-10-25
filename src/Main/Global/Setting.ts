@@ -7,6 +7,8 @@ import DefaultLocalSetting from '@/Setting';
 import _WorkPath from './_WorkPath';
 import fs from 'fs';
 
+const PackageJson = require('../../../package.json');
+
 const SettingGet = () => {
   const settingFilePath = _WorkPath('setting.json', true);
   if (settingFilePath && fs.existsSync(settingFilePath)) {
@@ -57,3 +59,10 @@ Reflect.set($$, 'Settings', {
   read: SettingGet,
   write: SettingSet
 });
+
+const __PackageJson = JSON.parse(JSON.stringify(PackageJson));
+const appName = __PackageJson.build.productName;
+const language = __PackageJson.build.nsis.installerLanguages;
+
+Reflect.set($$, 'appName', appName);
+Reflect.set($$, 'language', language); //'zh-CN' 'en-US'
