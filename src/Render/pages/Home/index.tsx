@@ -17,13 +17,6 @@ const Wrap: React.FC = () => {
   const [activeKey, setActiveKey] = useState<OperateType>('start');
 
   useEffect(() => {
-    get({})
-      .then(({ data }) => {
-        console.log(`res`, data);
-      })
-      .catch((err) => {
-        console.log(`err`, err);
-      });
     return () => {};
   }, []);
 

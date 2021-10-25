@@ -1017,8 +1017,8 @@
  */
 module.exports = {
   // Colors
-  '@primary-color': '#17449E',
-  '@normal-color': '#17449E',
+  '@primary-color': '#167ddc',
+  '@normal-color': '#167ddc',
   '@label-color': '#fff',
 
   // Popover

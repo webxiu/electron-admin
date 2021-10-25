@@ -47,7 +47,6 @@ export const Wrap: React.FC = ({ children }) => {
       </div>
       <style jsx>{`
         .main-layout {
-          background: #443131;
           overflow-y: auto;
         }
         .task-list-title {

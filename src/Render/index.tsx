@@ -1,4 +1,4 @@
-import '@/Render/assets/css/style.css';
+import '@/Render/assets/css/style.less';
 
 import App from '@/Render/routes';
 import ReactDOM from 'react-dom';

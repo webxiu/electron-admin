@@ -67,7 +67,7 @@ module.exports = {
                 ['@babel/plugin-proposal-decorators', { legacy: true }],
                 ['@babel/plugin-proposal-class-properties', { loose: true }],
                 ['@babel/plugin-proposal-object-rest-spread', { loose: true }],
-                ["@babel/plugin-proposal-private-methods", { loose: true }],
+                ['@babel/plugin-proposal-private-methods', { loose: true }],
                 ['@babel/plugin-syntax-dynamic-import'],
                 ['@babel/plugin-transform-runtime'],
                 ['styled-jsx/babel'],
@@ -142,58 +142,33 @@ module.exports = {
         use: [
           /** 从 JS 中创建样式节点 */
           Core.isPro() ? MiniCssExtractPlugin.loader : 'style-loader',
+          'css-loader',
           /** 转化 CSS 为 CommonJS */
-          {
-            loader: 'css-loader',
-            options: {
-              url: true,
-              import: true,
-              sourceMap: false,
-              esModule: true,
-              importLoaders: 1,
-              modules: {
-                mode: 'local',
-                exportGlobals: true,
-                hashPrefix: 'hash',
-                localIdentName: '[name]-[hash:8]'
-              }
-            }
-          },
+          // {
+          //   loader: 'css-loader',
+          //   options: {
+          //     url: true,
+          //     import: true,
+          //     sourceMap: false,
+          //     esModule: true,
+          //     importLoaders: 1,
+          //     modules: {
+          //       mode: 'local',
+          //       exportGlobals: true,
+          //       hashPrefix: 'hash',
+          //       localIdentName: '[name]-[hash:8]'
+          //     }
+          //   }
+          // },
           /** 编译 Less 为 CSS */
           {
             loader: 'less-loader',
             options: {
               sourceMap: true,
               lessOptions: {
+                // 可再此处配置全局样式, 如果使用less-loader@5，请移除 lessOptions 这一级直接配置选项。
+                modifyVars: config.antdTheme,
                 javascriptEnabled: true
-              }
-            }
-          }
-        ]
-      },
-      /** 项目全局 css 样式，没有 modules */
-      {
-        test: /\.(css)$/,
-        include: [Core.JoinCwd('src', 'Render', 'assets', 'css')],
-        use: [
-          Core.isPro() ? MiniCssExtractPlugin.loader : 'style-loader',
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: [
-                  /** autoprefixer css3 将未来的 CSS 特性带到今天！ 帮你将最新的 CSS 语法转换成大多数浏览器都能理解的语法，并根据你的目标浏览器或运行时环境来确定你需要的 polyfills，此功能基于 cssdb 实现 */
-                  'postcss-preset-env',
-                  /** @import ''; */
-                  'postcss-import',
-                  /** sass 语法 */
-                  'precss',
-                  /** css flex 解析，简写和全写 */
-                  'postcss-flexbugs-fixes'
-                  /** 压缩 optimize-css-assets-webpack-plugin 统一处理 */
-                  // Core.isPro() ? ['cssnano'] : null
-                ]
               }
             }
           }
