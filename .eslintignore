@@ -1,0 +1,24 @@
+# !**/.eslintrc*
+node_modules
+dist
+public
+*.svg
+*.ico
+*.json
+.gitignore
+*.md
+*.log
+*.lock
+.vsocde/
+.xeajs
+
+# prettier
+*.prettierrc.*
+typings
+src/*.js
+./*.js
+electron-cli-service
+scripts
+
+src/Render/service/index.ts
+src/Render/service/index copy.ts

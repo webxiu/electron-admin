@@ -1,0 +1,143 @@
+@import 'define/index.css';
+@import 'antd/theme.css';
+
+html,
+body,
+#root {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+ul, ol, li {
+  list-style: none;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+body {
+  video {
+    background-color: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .line-title {
+    position: relative;
+    font-size: 18px;
+    color: #009EE9;
+    vertical-align: middle;
+    padding-left: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #009EE9;
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(0, -50%);
+    }
+
+    &.border {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #0F2757;
+
+      &::before {
+        top: 72%;
+      }
+    }
+
+  }
+
+  /* 文本按钮 */
+  .link-button {
+    display: inline-block;  
+    color: #0253DB;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .link-button:hover {
+    opacity: 0.9;
+  }
+  .link-button.delete {
+    color: #CE5B53;
+  }
+  .link-button:not(:last-child) {
+    margin-right: 12px;
+  }
+  .link-button:first-child {
+    margin-left: 12px;
+  }
+
+  /* 输入框清除图标 */
+  .ant-input-clear-icon {
+    color: #b5b5b5;
+  }
+
+  /*
+    ::-webkit-scrollbar — 整个滚动条.
+    ::-webkit-scrollbar-button — 滚动条上的按钮 (上下箭头).
+    ::-webkit-scrollbar-thumb — 滚动条上的滚动滑块.
+    ::-webkit-scrollbar-track — 滚动条轨道.
+    ::-webkit-scrollbar-track-piece — 滚动条没有滑块的轨道部分.
+    ::-webkit-scrollbar-corner — 当同时有垂直滚动条和水平滚动条时交汇的部分.
+    ::-webkit-resizer — 某些元素的corner部分的部分样式(例:textarea的可拖动按钮).
+    ::-webkit-scrollbar-corner —  滚动条左下角交叉方块
+  */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    border-radius: 10px;
+    background-color: #0b2750;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+    background-color: #255AB2;
+    /* var(--scrollbar)*/
+  }
+
+  ::-webkit-scrollbar-corner {
+    /*
+      background-image: url(resources/corner.png);
+      background-repeat: no-repeat;
+    */
+    background-color: var(--bodybgc);
+  }
+
+  .select-lib-container {
+    width: 344px;
+    height: 100px;
+    background: #0b1e42;
+    border-radius: 8px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    >img {
+      margin-bottom: 5px;
+    }
+  }
+
+}
