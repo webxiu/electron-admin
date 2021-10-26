@@ -18,15 +18,17 @@ const resources = {
 };
 
 i18n.use(initReactI18next).init({
-  //引入资源文件
+  // 引入资源文件
   resources: resources,
-  //选择默认语言，选择内容为上述配置中的key，即en/zh_CN
+  // 默认语言，上述配置中的key，即: en/zh_CN
   fallbackLng: LANGUAGE,
   lng: LANGUAGE,
-  supportedLngs: ['en', 'zh_CN'],
+  // 支持语言 ['en', 'zh_CN']
+  supportedLngs: Object.keys(resources),
   debug: false,
   interpolation: {
-    escapeValue: false // not needed for react as it escapes by default
+    // not needed for react as it escapes by default
+    escapeValue: false
   }
 });
 

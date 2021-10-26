@@ -7,6 +7,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 let PackageJson = require('../../package.json');
+const config = require('../../config');
 
 const buildPackageFilePath = path.join(process.cwd(), 'package.json');
 const { BUILD_NUMBER } = process.env;
@@ -28,21 +29,13 @@ if (BUILD_NUMBER) {
 
 // 根据环境变量修改build的nsis的向导语言installerLanguages
 if (process.env.LANGUAGE) {
-  const lanMap = {
-    zh_CN: 'zh-CN',
-    en: 'en-US'
-  };
-  const appName = {
-    zh_CN: '海阔天空',
-    en: 'Sea And Sky'
-  };
-  const appWinIcon = {
-    zh_CN: 'public/assets/favicon/png/favicon@5x.png',
-    en: 'public/assets/favicon/png/favicon_en@5x.png'
-  };
-  __PackageJson.build.nsis.installerLanguages = lanMap[process.env.LANGUAGE];
-  __PackageJson.build.productName = appName[process.env.LANGUAGE];
-  __PackageJson.build.win.icon = appWinIcon[process.env.LANGUAGE];
+  const languages = config.languages;
+  const appConfig = languages[process.env.LANGUAGE];
+  const { appLang, appName, appWinIcon } = appConfig;
+
+  appLang && (__PackageJson.build.nsis.installerLanguages = appLang);
+  appName && (__PackageJson.build.productName = appName);
+  appWinIcon && (__PackageJson.build.win.icon = appWinIcon);
 }
 
 fs.writeFileSync(buildPackageFilePath, JSON.stringify(__PackageJson, null, 2), { encoding: 'utf-8' });
