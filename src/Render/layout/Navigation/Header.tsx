@@ -1,11 +1,13 @@
 import { Dropdown, Menu, Modal } from 'antd';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { getLanguage, setLanguage } from '@/Render/utils/auth';
 
 import { DownOutlined } from '@ant-design/icons';
 import GroupIcon from '@/Render/assets/img/icons/group_icon.png';
 import ListIcon from '@/Render/assets/img/icons/list_icon.png';
 import PubSub from 'pubsub-js';
 import SystemController from '@/Render/components/SystemController';
+import i18n from '@/Render/routes/i18n';
 import { useHistory } from 'react-router';
 import { useInject } from '@/Render/components/Hooks';
 import { useObserver } from 'mobx-react';
@@ -23,11 +25,29 @@ export const Header: React.FC<Props> = (props) => {
   const Store = useInject('Global');
   const history = useHistory();
   const { t } = useTranslation('login');
+  const [changeLang, setChangeLang] = useState<string>('');
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const lang = getLanguage();
+    if (lang) {
+      setLanguage(lang);
+      setChangeLang(lang);
+      i18n.changeLanguage(lang);
+    } else {
+      i18n.changeLanguage(changeLang);
+    }
+  }, [changeLang]);
 
   const goTo = (href: string) => {
     history.push(href);
+  };
+
+  const changeLanguage = () => {
+    setChangeLang((lang) => {
+      const l = lang === 'zh_CN' ? 'en' : 'zh_CN';
+      setLanguage(l);
+      return l;
+    });
   };
 
   return useObserver(() => (
@@ -38,6 +58,9 @@ export const Header: React.FC<Props> = (props) => {
         </div>
         <div className="control-group">
           <div className="flex ui-h-100 just-center align-center header-right-options">
+            <div className="no-drag flex just-center align-center control-btn cursor" onClick={changeLanguage}>
+              {changeLang === '' ? '语言' : changeLang === 'zh_CN' ? '中' : '英'}
+            </div>
             <div className="no-drag flex just-center align-center control-btn">
               <img src={GroupIcon} height={20} alt="" />
             </div>
