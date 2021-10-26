@@ -1,0 +1,49 @@
+---
+# 菜单配置初始化(服务启动时会进行数据检查，如果存在则不再初始化)
+- name: 音频预处理
+  code: PreProcessing
+  children:
+    - name: 音频降噪
+      code: AudioDenoise
+    - name: 音频浓缩
+      code: AudioCondense
+    - name: 人声分离
+      code: VoiceSeparation
+- name: 音频智能处理
+  code: InteProcessing
+  children:
+    - name: 声纹比对
+      code: VoiceCompare
+      children:
+        - name: 1比1
+          code: VoiceCompareOne
+        - name: 1比N
+          code: VoiceCompareMore
+        - name: N比N
+          code: VoiceCompareMoreThanMore
+    - name: 音频布控
+      code: AudioTask
+      children:
+        - name: 布控任务
+          code: DeployTask
+        - name: 布控告警
+          code: DeployAlarm
+- name: 声纹库管理
+  code: VoiceManagement
+  children:
+    - name: 样本库
+      code: SampleLibrary
+    - name: 检材库
+      code: MaterialLibrary
+- name: 个人中心
+  code: PersonalCenter
+  children:
+    - name: 个人信息
+      code: Personalinformation
+- name: 系统管理
+  code: SystemManagement
+  children:
+    - name: 用户管理
+      code: UserManagement
+    - name: 角色管理
+      code: RoleManagement

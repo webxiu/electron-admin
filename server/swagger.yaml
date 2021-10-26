@@ -1,0 +1,5761 @@
+
+
+openapi: 3.0.0
+servers:
+  
+info:
+  description: |
+    api document
+  version: /v1
+  title: 
+  contact:
+    email: xiachengjia@speakin.mobi
+  license:
+    name: Mit
+    url: 'https://opensource.org/licenses/MIT'
+paths:
+  '/v1/AddTaskApi':
+    post:
+      description: '新增布控任务'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlTaskAddTaskReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlTaskAddTaskRsp'
+  '/v1/DeleteTaskApi':
+    post:
+      description: '删除布控任务'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlTaskDeleteTaskReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlTaskDeleteTaskRsp'
+  '/v1/RevokeTaskApi':
+    post:
+      description: '撤销布控任务'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlTaskRevokeTaskReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlTaskRevokeTaskRsp'
+  '/v1/TaskDetailsApi':
+    post:
+      description: '布控任务详情'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlTaskTaskDetailsReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlTaskTaskDetailsRsp'
+  '/v1/ListTaskApi':
+    post:
+      description: '布控任务列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlTaskListTaskReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlTaskListTaskRsp'
+  '/v1/ListAlarmApi':
+    post:
+      description: '布控告警列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlAlarmListAlarmReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlAlarmListAlarmRsp'
+  '/v1/AlarmDetailsApi':
+    post:
+      description: '告警详情'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployControlAlarmAlarmDetailsReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespDeployControlAlarmAlarmDetailsRsp'
+  '/v1/SearchVoiceApi':
+    post:
+      description: '以音搜音'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchBySoundSearchVoiceReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSearchBySoundSearchVoiceRsp'
+  '/v1/VoiceCompareMoreApi':
+    post:
+      description: '声纹比对1比N'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceCompareVoiceCompareMoreReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceCompareVoiceCompareMoreRsp'
+  '/v1/VoiceCompareMoreThanMoreApi':
+    post:
+      description: '声纹比对N比N'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceCompareVoiceCompareMoreThanMoreReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceCompareVoiceCompareMoreThanMoreRsp'
+  '/v1/VoiceCompareOneApi':
+    post:
+      description: '声纹比对1比1'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceCompareVoiceCompareOneReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceCompareVoiceCompareOneRsp'
+  '/v1/ListSampleLibraryFileApi':
+    post:
+      description: '列出样本库音频'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceCompareListSampleLibraryFileReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceCompareListSampleLibraryFileRsp'
+  '/v1/SampleRegisterApi':
+    post:
+      description: '样本注册'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleLibrarySampleRegisterReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSampleLibrarySampleRegisterRsp'
+  '/v1/BatchSampleRegisterApi':
+    post:
+      description: '批量样本注册'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleLibraryBatchSampleRegisterReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSampleLibraryBatchSampleRegisterRsp'
+  '/v1/GetSampleDetailsApi':
+    post:
+      description: '查看样本详情'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleLibraryGetSampleDetailsReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSampleLibraryGetSampleDetailsRsp'
+  '/v1/DeleteSampleApi':
+    post:
+      description: '删除样本'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleLibraryDeleteSampleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSampleLibraryDeleteSampleRsp'
+  '/v1/ListSample':
+    post:
+      description: '样本列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleLibraryListSampleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSampleLibraryListSampleRsp'
+  '/v1/viewMaterial':
+    post:
+      description: '查看检材'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialLibraryViewMaterialReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespMaterialLibraryViewMaterialRsp'
+  '/v1/addMaterials':
+    post:
+      description: '新增检材'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialLibraryAddMaterialsReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespMaterialLibraryAddMaterialsRsp'
+  '/v1/ListMaterial':
+    post:
+      description: '检材列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialLibraryListMaterialReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespMaterialLibraryListMaterialRsp'
+  '/v1/clusterUpload':
+    post:
+      description: '聚类上传'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialLibraryClusterUploadReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespMaterialLibraryClusterUploadRsp'
+  '/v1/DeleteMaterialApi':
+    post:
+      description: '删除检材'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialLibraryDeleteMaterialReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespMaterialLibraryDeleteMaterialRsp'
+  '/v1/ListHistoryRecordApi':
+    post:
+      description: '历史记录列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRecordListHistoryRecordReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespHistoryRecordListHistoryRecordRsp'
+  '/v1/RecordDetailsApi':
+    post:
+      description: '历史记录详情'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRecordRecordDetailsReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespHistoryRecordRecordDetailsRsp'
+  '/v1/DeleteHistoryRecordApi':
+    post:
+      description: '删除历史记录'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRecordDeleteHistoryRecordReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespHistoryRecordDeleteHistoryRecordRsp'
+  '/v1/AudioCondenseApi':
+    post:
+      description: '音频浓缩'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioCondenseReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resp'
+  '/v1/AudioCondenseResultApi':
+    post:
+      description: '音频浓缩异步结果获取'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioCondenseResultReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAudioAnalysisAudioCondenseResultRsp'
+  '/v1/AudioDenoiseApi':
+    post:
+      description: '音频降噪'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioDenoiseReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resp'
+  '/v1/AudioDenoiseResultApi':
+    post:
+      description: '音频降噪异步结果获取'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioCondenseResultReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAudioAnalysisAudioCondenseResultRsp'
+  '/v1/VoiceSeparationApi':
+    post:
+      description: '人声分离'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisVoiceSeparationReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resp'
+  '/v1/VoiceSeparationResultApi':
+    post:
+      description: '人声分离异步结果获取'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisVoiceSeparationResultReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAudioAnalysisVoiceSeparationResultRsp'
+  '/v1/AudioClusterApi':
+    post:
+      description: '音频聚类'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioClusterReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resp'
+  '/v1/AudioClusterResultApi':
+    post:
+      description: '音频聚类异步结果获取'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioAnalysisAudioClusterResultReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAudioAnalysisAudioClusterResultRsp'
+  '/v1/GetVoiceWaveformApi':
+    post:
+      description: '获取音频波形图'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGetVoiceWaveformReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileGetVoiceWaveformRsp'
+  '/v1/GetVoiceWaveformBySrcApi':
+    post:
+      description: '获取音频波形图，直接传文件路径'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGetVoiceWaveformBySrcReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileGetVoiceWaveformBySrcRsp'
+  '/v1/upload':
+    post:
+      description: '上传文件'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileUploadRsp'
+  '/v1/cancelUpload':
+    post:
+      description: '取消上传'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileCancelUploadReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileCancelUploadRsp'
+  '/v1/uploadProgress':
+    post:
+      description: '上传文件进度'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadProgressReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileUploadProgressRsp'
+  '/v1/BatchuploadProgress':
+    post:
+      description: '批量获取上传文件进度'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileBatchUploadProgressReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileBatchUploadProgressRsp'
+  '/v1/getFile':
+    post:
+      description: '获取文件信息'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGetFileReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileGetFileRsp'
+  '/v1/getFileBySrc':
+    post:
+      description: '获取文件信息'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGetFileBySrcReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileGetFileBySrcRsp'
+  '/v1/download':
+    post:
+      description: '下载'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDownloadReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileDownloadRsp'
+  '/v1/historyFile':
+    post:
+      description: '音频处理历史记录'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileHistoryFileReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileHistoryFileRsp'
+  '/v1/deleteFile':
+    post:
+      description: '删除文件'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDeleteFileReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespFileDeleteFileRsp'
+  '/v1/addTag':
+    post:
+      description: '新增标注'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceTagAddTagReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceTagAddTagRsp'
+  '/v1/editTag':
+    post:
+      description: '编辑标注'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceTagEditTagReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceTagEditTagRsp'
+  '/v1/listTag':
+    post:
+      description: '标注列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceTagListTagReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVoiceTagListTagRsp'
+  '/v1/getUser':
+    post:
+      description: '获取用户信息'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGetUserReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserGetUserRsp'
+  '/v1/addUser':
+    post:
+      description: '新增用户'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAddUserReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserAddUserRsp'
+  '/v1/editUser':
+    post:
+      description: '编辑用户'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditUserReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserEditUserRsp'
+  '/v1/listUser':
+    post:
+      description: '用户列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserListUserReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserListUserRsp'
+  '/v1/deleteUser':
+    post:
+      description: '删除用户'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeleteUserReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserDeleteUserRsp'
+  '/v1/changePassword':
+    post:
+      description: '修改密码'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChangePasswordReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserChangePasswordRsp'
+  '/v1/resetPassword':
+    post:
+      description: '重置密码'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResetPasswordReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserResetPasswordRsp'
+  '/v1/listOperatingRecord':
+    post:
+      description: '操作记录列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserListOperatingRecordReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserListOperatingRecordRsp'
+  '/v1/login':
+    post:
+      description: '登录'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserLoginRsp'
+  '/v1/logout':
+    post:
+      description: '退出登录'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUserLogoutRsp'
+  '/v1/addOrganization':
+    post:
+      description: '新增组织'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationAddOrganizationReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespOrganizationAddOrganizationRsp'
+  '/v1/editOrganization':
+    post:
+      description: '编辑组织'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationEditOrganizationReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespOrganizationEditOrganizationRsp'
+  '/v1/listOrganization':
+    post:
+      description: '组织列表'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespOrganizationListOrganizationRsp'
+  '/v1/deleteOrganization':
+    post:
+      description: '删除组织'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationDeleteOrganizationReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespOrganizationDeleteOrganizationRsp'
+  '/v1/addRole':
+    post:
+      description: '新增角色'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAddRoleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRoleAddRoleRsp'
+  '/v1/editRole':
+    post:
+      description: '编辑角色'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleEditRoleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRoleEditRoleRsp'
+  '/v1/listRole':
+    post:
+      description: '角色列表'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleListRoleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRoleListRoleRsp'
+  '/v1/deleteRole':
+    post:
+      description: '删除角色'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleDeleteRoleReq'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRoleDeleteRoleRsp'
+  '/v1/listPermission':
+    post:
+      description: '权限列表'
+      responses:
+        '200':
+          description: 响应参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRoleListPermissionRsp'
+components:
+  schemas:
+    AlgoResultFileInfo:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频Id"
+          
+      
+        file_path:
+          type: string
+          example: ''
+          description: "音频路径"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "音频名称"
+          
+      
+        file_duration:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频时长"
+          
+      
+        origin_file_name:
+          type: string
+          example: ''
+          description: "原始音频名称"
+          
+      
+      xml: 
+        name: AlgoResultFileInfo
+    
+    AudioAnalysisAudioClusterReq:
+      type: object
+      properties:
+        file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "文件ID列表"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioClusterReq
+    
+    AudioAnalysisAudioClusterResultReq:
+      type: object
+      properties:
+        file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "文件ID列表"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioClusterResultReq
+    
+    AudioAnalysisAudioClusterResultRsp:
+      type: object
+      properties:
+        group:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/AudioAnalysisClusterGroup'
+          description: "分组"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "任务状态,是否完成 enum: finish/doing"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioClusterResultRsp
+    
+    AudioAnalysisAudioCondenseReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+        is_all_content:
+          type: string
+          example: ''
+          description: "是否选中全文 enum: YES/NO"
+          
+      
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间(ms)"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间(ms)"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioCondenseReq
+    
+    AudioAnalysisAudioCondenseResultReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioCondenseResultReq
+    
+    AudioAnalysisAudioCondenseResultRsp:
+      type: object
+      properties:
+        result_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "结果音频id"
+          
+      
+        result_path:
+          type: string
+          example: ''
+          description: "结果音频路径"
+          
+      
+        result_File_name:
+          type: string
+          example: ''
+          description: "结果音频名称"
+          
+      
+        origin_file_name:
+          type: string
+          example: ''
+          description: "原始音频名称"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "任务状态,是否完成 enum: finish/doing"
+          
+      
+        condense_slice:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/AudioAnalysisCondenseInfo'
+          description: "智能标记分片"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioCondenseResultRsp
+    
+    AudioAnalysisAudioDenoiseReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+        is_all_content:
+          type: string
+          example: ''
+          description: "是否选中全文 enum: YES/NO"
+          
+      
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间(ms)"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间(ms)"
+          
+      
+        function:
+          type: string
+          example: ''
+          description: "功能，DENOISE(降噪)/TONEUP(增益)"
+          
+      
+        denoise_type:
+          type: string
+          example: ''
+          description: "降噪类型，NEURAL(神经网络)/WIENER(维纳滤波)"
+          
+      
+        denoise_level:
+          type: integer
+          example: 0
+          format: int64
+          description: "降噪级别，维纳滤波降噪有效，0-100"
+          
+      
+        toneup_ratio:
+          type: integer
+          example: 0
+          format: int64
+          description: "增益比率，增益有效，0-100"
+          
+      
+      xml: 
+        name: AudioAnalysisAudioDenoiseReq
+    
+    AudioAnalysisClusterGroup:
+      type: object
+      properties:
+        voice_print:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/AudioAnalysisVoiceprint'
+          description: "音频标记"
+          
+      
+      xml: 
+        name: AudioAnalysisClusterGroup
+    
+    AudioAnalysisCondenseInfo:
+      type: object
+      properties:
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间(ms)"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间(ms)"
+          
+      
+      xml: 
+        name: AudioAnalysisCondenseInfo
+    
+    AudioAnalysisVoiceSeparationReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+        function:
+          type: string
+          example: ''
+          description: "功能，INTELLIGENT(智能分离)/CUSTOM(自定义分离)"
+          
+      
+        number:
+          type: integer
+          example: 0
+          format: int64
+          description: "人数"
+          
+      
+        type:
+          type: integer
+          example: 0
+          format: int64
+          description: "类型，0(电话)/1(其它)"
+          
+      
+      xml: 
+        name: AudioAnalysisVoiceSeparationReq
+    
+    AudioAnalysisVoiceSeparationResultReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+      xml: 
+        name: AudioAnalysisVoiceSeparationResultReq
+    
+    AudioAnalysisVoiceSeparationResultRsp:
+      type: object
+      properties:
+        result_file_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/AlgoResultFileInfo'
+          description: "分离音频列表"
+          
+      
+        origin_file_name:
+          type: string
+          example: ''
+          description: "原始音频名称"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "任务状态,是否完成 enum: finish/doing"
+          
+      
+      xml: 
+        name: AudioAnalysisVoiceSeparationResultRsp
+    
+    AudioAnalysisVoiceprint:
+      type: object
+      properties:
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+        vector:
+          type: string
+          example: ''
+          description: "声纹向量"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件id"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+      xml: 
+        name: AudioAnalysisVoiceprint
+    
+    DeployControlAlarmAlarmDetailsReq:
+      type: object
+      properties:
+        alarm_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警编号"
+          
+      
+      xml: 
+        name: DeployControlAlarmAlarmDetailsReq
+    
+    DeployControlAlarmAlarmDetailsRsp:
+      type: object
+      properties:
+        score:
+          type: number
+          example: 0
+          format: double
+          description: "声纹相似度"
+          
+      
+        task_name:
+          type: string
+          example: ''
+          description: "布控任务名称"
+          
+      
+        alarm_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警时间"
+          
+      
+        alarm_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警编号"
+          
+      
+        alarm_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警音频id"
+          
+      
+        alarm_file_name:
+          type: string
+          example: ''
+          description: "告警音频名称"
+          
+      
+        alarm_language:
+          type: string
+          example: ''
+          description: "告警音频语种"
+          
+      
+        alarm_sample_library_name:
+          type: string
+          example: ''
+          description: "所属样本库名称"
+          
+      
+        task_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控音频id"
+          
+      
+        task_file_name:
+          type: string
+          example: ''
+          description: "布控音频名称"
+          
+      
+        task_language:
+          type: string
+          example: ''
+          description: "布控音频语种"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "布控状态 enum:DEPLOY_CONTROL_ING:布控中,DEPLOY_CONTROL_REVOKE:已撤销"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "所属声纹库，MATERIAL(检材)/SAMPLE(样本)"
+          
+      
+      xml: 
+        name: DeployControlAlarmAlarmDetailsRsp
+    
+    DeployControlAlarmAlarmInfo:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警音频id"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "告警音频名称"
+          
+      
+        score:
+          type: number
+          example: 0
+          format: double
+          description: "声纹相似度"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "语种识别"
+          
+      
+        task_name:
+          type: string
+          example: ''
+          description: "布控任务名称"
+          
+      
+        alarm_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警时间"
+          
+      
+        alarm_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警编号"
+          
+      
+      xml: 
+        name: DeployControlAlarmAlarmInfo
+    
+    DeployControlAlarmListAlarmReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "告警音频名称"
+          
+      
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警时间-开始"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "告警时间-结束"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: DeployControlAlarmListAlarmReq
+    
+    DeployControlAlarmListAlarmRsp:
+      type: object
+      properties:
+        alarm_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/DeployControlAlarmAlarmInfo'
+          description: "告警信息"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数"
+          
+      
+      xml: 
+        name: DeployControlAlarmListAlarmRsp
+    
+    DeployControlTaskAddTaskReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "布控范围，ALL(全部)/SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum: YES/NO"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控音频id"
+          
+      
+      xml: 
+        name: DeployControlTaskAddTaskReq
+    
+    DeployControlTaskAddTaskRsp:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控任务id"
+          
+      
+      xml: 
+        name: DeployControlTaskAddTaskRsp
+    
+    DeployControlTaskDeleteTaskReq:
+      type: object
+      properties:
+        task_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "布控任务id列表"
+          
+      
+      xml: 
+        name: DeployControlTaskDeleteTaskReq
+    
+    DeployControlTaskListTaskReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称筛选"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "布控状态筛选 enum:DEPLOY_CONTROL_ALL:全部,DEPLOY_CONTROL_ING:布控中,DEPLOY_CONTROL_REVOKE:已撤销"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: DeployControlTaskListTaskReq
+    
+    DeployControlTaskListTaskRsp:
+      type: object
+      properties:
+        task_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/DeployControlTaskTaskInfo'
+          description: "任务列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数"
+          
+      
+      xml: 
+        name: DeployControlTaskListTaskRsp
+    
+    DeployControlTaskRevokeTaskReq:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控任务id"
+          
+      
+      xml: 
+        name: DeployControlTaskRevokeTaskReq
+    
+    DeployControlTaskTaskDetailsReq:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控任务id"
+          
+      
+      xml: 
+        name: DeployControlTaskTaskDetailsReq
+    
+    DeployControlTaskTaskDetailsRsp:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "任务编号"
+          
+      
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "布控状态 enum:DEPLOY_CONTROL_ING:布控中,DEPLOY_CONTROL_REVOKE:已撤销"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum: YES/NO"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控音频id"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "布控音频名称"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "语种识别"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "布控范围，ALL(全部)/SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+      xml: 
+        name: DeployControlTaskTaskDetailsRsp
+    
+    DeployControlTaskTaskInfo:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "布控任务id"
+          
+      
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        task_status:
+          type: string
+          example: ''
+          description: "布控状态 enum:DEPLOY_CONTROL_ING:布控中,DEPLOY_CONTROL_REVOKE:已撤销"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "语种识别"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "布控范围，ALL(全部)/SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+      xml: 
+        name: DeployControlTaskTaskInfo
+    
+    FileBatchUploadProgressReq:
+      type: object
+      properties:
+        file_id_list:
+          type: array
+          example: [1]
+          items: 
+            type: integer
+            example: 1
+            format: int64
+          description: "文件ID列表"
+          
+      
+      xml: 
+        name: FileBatchUploadProgressReq
+    
+    FileBatchUploadProgressRsp:
+      type: object
+      properties:
+        status_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/FileUploadProgressStatus'
+          description: "状态列表"
+          
+      
+      xml: 
+        name: FileBatchUploadProgressRsp
+    
+    FileCancelUploadReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: FileCancelUploadReq
+    
+    FileDeleteFileReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: FileDeleteFileReq
+    
+    FileDownloadReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: FileDownloadReq
+    
+    FileDownloadRsp:
+      type: object
+      properties:
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+      xml: 
+        name: FileDownloadRsp
+    
+    FileGetFileBySrcReq:
+      type: object
+      properties:
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+      xml: 
+        name: FileGetFileBySrcReq
+    
+    FileGetFileBySrcRsp:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+        duration:
+          type: integer
+          example: 0
+          format: int64
+          description: "时长"
+          
+      
+        size:
+          type: integer
+          example: 0
+          format: int64
+          description: "大小"
+          
+      
+        format:
+          type: string
+          example: ''
+          description: "格式"
+          
+      
+        channel:
+          type: string
+          example: ''
+          description: "声道"
+          
+      
+        real_channel:
+          type: integer
+          example: 0
+          format: int64
+          description: "实际声道数"
+          
+      
+        sampleRate:
+          type: string
+          example: ''
+          description: "采样率"
+          
+      
+        samplingAccuracy:
+          type: string
+          example: ''
+          description: "采样精度"
+          
+      
+        createTime:
+          type: integer
+          example: 0
+          format: int64
+          description: "上传时间"
+          
+      
+      xml: 
+        name: FileGetFileBySrcRsp
+    
+    FileGetFileReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: FileGetFileReq
+    
+    FileGetFileRsp:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+        original_name:
+          type: string
+          example: ''
+          description: "原名称"
+          
+      
+        duration:
+          type: integer
+          example: 0
+          format: int64
+          description: "时长"
+          
+      
+        size:
+          type: integer
+          example: 0
+          format: int64
+          description: "大小"
+          
+      
+        format:
+          type: string
+          example: ''
+          description: "格式"
+          
+      
+        channel:
+          type: string
+          example: ''
+          description: "声道"
+          
+      
+        real_channel:
+          type: integer
+          example: 0
+          format: int64
+          description: "实际声道数"
+          
+      
+        sampleRate:
+          type: string
+          example: ''
+          description: "采样率"
+          
+      
+        samplingAccuracy:
+          type: string
+          example: ''
+          description: "采样精度"
+          
+      
+        createTime:
+          type: integer
+          example: 0
+          format: int64
+          description: "上传时间"
+          
+      
+      xml: 
+        name: FileGetFileRsp
+    
+    FileGetVoiceWaveformBySrcReq:
+      type: object
+      properties:
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+      xml: 
+        name: FileGetVoiceWaveformBySrcReq
+    
+    FileGetVoiceWaveformBySrcRsp:
+      type: object
+      properties:
+        data:
+          type: array
+          example: null
+          items: 
+            type: number
+            example: 0
+            format: double
+          description: "波形图"
+          
+      
+      xml: 
+        name: FileGetVoiceWaveformBySrcRsp
+    
+    FileGetVoiceWaveformReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+      xml: 
+        name: FileGetVoiceWaveformReq
+    
+    FileGetVoiceWaveformRsp:
+      type: object
+      properties:
+        data:
+          type: array
+          example: null
+          items: 
+            type: number
+            example: 0
+            format: double
+          description: "波形图"
+          
+      
+      xml: 
+        name: FileGetVoiceWaveformRsp
+    
+    FileHistoryFileInfo:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+        file_src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+        original_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "原文件ID"
+          
+      
+        original_file_name:
+          type: string
+          example: ''
+          description: "原文件名称"
+          
+      
+        original_file_src:
+          type: string
+          example: ''
+          description: "原文件路径"
+          
+      
+        createTime:
+          type: integer
+          example: 0
+          format: int64
+          description: "上传时间"
+          
+      
+      xml: 
+        name: FileHistoryFileInfo
+    
+    FileHistoryFileReq:
+      type: object
+      properties:
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: FileHistoryFileReq
+    
+    FileHistoryFileRsp:
+      type: object
+      properties:
+        history_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/FileHistoryFileInfo'
+          description: "记录"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数目"
+          
+      
+      xml: 
+        name: FileHistoryFileRsp
+    
+    FileUploadProgressReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: FileUploadProgressReq
+    
+    FileUploadProgressRsp:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ''
+          description: "状态，enum:start(开始),finish(完成),error(失败)"
+          
+      
+        msg:
+          type: string
+          example: ''
+          description: "错误信息"
+          
+      
+      xml: 
+        name: FileUploadProgressRsp
+    
+    FileUploadProgressStatus:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+        file_src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+        status:
+          type: string
+          example: ''
+          description: "状态，enum:start(开始),finish(完成),error(失败)"
+          
+      
+        msg:
+          type: string
+          example: ''
+          description: "错误信息"
+          
+      
+      xml: 
+        name: FileUploadProgressStatus
+    
+    FileUploadReq:
+      type: object
+      properties:
+        file_list:
+          type: array
+          example: [{"src":"G/test/test.wav","is_convert":false}]
+          items: 
+            $ref: '#/components/schemas/FilefileReq'
+          description: "文件列表"
+          
+      
+      xml: 
+        name: FileUploadReq
+    
+    FileUploadRsp:
+      type: object
+      properties:
+        file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "文件ID列表"
+          
+      
+      xml: 
+        name: FileUploadRsp
+    
+    FilefileReq:
+      type: object
+      properties:
+        src:
+          type: string
+          example: 'G/test/test.wav'
+          description: "文件路径"
+          
+      
+        is_convert:
+          type: boolean
+          example: false
+          description: "是否转换格式"
+          
+      
+      xml: 
+        name: FilefileReq
+    
+    HistoryRecordDeleteHistoryRecordReq:
+      type: object
+      properties:
+        id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "历史记录id列表"
+          
+      
+      xml: 
+        name: HistoryRecordDeleteHistoryRecordReq
+    
+    HistoryRecordHistoryRecordInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "历史记录id"
+          
+      
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        record_type:
+          type: string
+          example: ''
+          description: "记录类型, enum: VOICE_ANALYSIS,SEARCH_VOICE,VPR"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+      xml: 
+        name: HistoryRecordHistoryRecordInfo
+    
+    HistoryRecordListHistoryRecordReq:
+      type: object
+      properties:
+        record_type:
+          type: string
+          example: ''
+          description: "历史记录类型 enum:HSTR_ALL:全部,HSTR_SEARCH_VOICE:以音搜音,HSTR_VOICE_COMPARE_ONE:1比1,HSTR_VOICE_COMPARE_MORE:1比N"
+          
+      
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: HistoryRecordListHistoryRecordReq
+    
+    HistoryRecordListHistoryRecordRsp:
+      type: object
+      properties:
+        history_record_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/HistoryRecordHistoryRecordInfo'
+          description: "历史纪录列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "历史纪录总数目"
+          
+      
+      xml: 
+        name: HistoryRecordListHistoryRecordRsp
+    
+    HistoryRecordRecordDetailsReq:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "历史记录id"
+          
+      
+      xml: 
+        name: HistoryRecordRecordDetailsReq
+    
+    HistoryRecordRecordDetailsRsp:
+      type: object
+      properties:
+        record_type:
+          type: string
+          example: ''
+          description: "记录类型 enum: VOICE_ANALYSIS(语音分析),SEARCH_VOICE(以音搜音),VPR(声纹检索)"
+          
+      
+        record_data:
+          type: string
+          example: ''
+          description: "json数据"
+          
+      
+      xml: 
+        name: HistoryRecordRecordDetailsRsp
+    
+    MaterialLibraryAddMaterialsReq:
+      type: object
+      properties:
+        file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "文件ID列表"
+          
+      
+      xml: 
+        name: MaterialLibraryAddMaterialsReq
+    
+    MaterialLibraryClusterGroup:
+      type: object
+      properties:
+        voice_print:
+          type: array
+          example: [{"src":"G:/lijian_storage/202105141/202105141_7d699f8f96ae4e7a9af6653f4b35446a.wav","vector":"","file_id":1,"file_name":"xx.wav"}]
+          items: 
+            $ref: '#/components/schemas/MaterialLibraryVoiceprint'
+          description: "音频标记"
+          
+      
+      xml: 
+        name: MaterialLibraryClusterGroup
+    
+    MaterialLibraryClusterUploadReq:
+      type: object
+      properties:
+        group:
+          type: array
+          example: [{"voice_print":[{"src":"G:/lijian_storage/202105141/202105141_7d699f8f96ae4e7a9af6653f4b35446a.wav","vector":"","file_id":1,"file_name":"xx.wav"}]}]
+          items: 
+            $ref: '#/components/schemas/MaterialLibraryClusterGroup'
+          description: "分组"
+          
+      
+      xml: 
+        name: MaterialLibraryClusterUploadReq
+    
+    MaterialLibraryDeleteMaterialReq:
+      type: object
+      properties:
+        id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "检材id列表"
+          
+      
+      xml: 
+        name: MaterialLibraryDeleteMaterialReq
+    
+    MaterialLibraryListMaterialReq:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        is_cluster:
+          type: boolean
+          example: false
+          description: "是否聚类"
+          
+      
+        create_begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间-开始"
+          
+      
+        create_end:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间-结束"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: MaterialLibraryListMaterialReq
+    
+    MaterialLibraryListMaterialRsp:
+      type: object
+      properties:
+        material_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/MaterialLibraryMaterialInfo'
+          description: "声纹列表"
+          
+      
+        totalCount:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数"
+          
+      
+      xml: 
+        name: MaterialLibraryListMaterialRsp
+    
+    MaterialLibraryMaterialInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "声纹id"
+          
+      
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频文件id"
+          
+      
+        is_cluster:
+          type: boolean
+          example: false
+          description: "是否聚类"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+      xml: 
+        name: MaterialLibraryMaterialInfo
+    
+    MaterialLibraryViewMaterialReq:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "检材ID"
+          
+      
+      xml: 
+        name: MaterialLibraryViewMaterialReq
+    
+    MaterialLibraryViewMaterialRsp:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        is_cluster:
+          type: boolean
+          example: false
+          description: "是否聚类"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频文件id"
+          
+      
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+        voice_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/MaterialLibraryVoiceInfo'
+          description: "聚类音频信息列表"
+          
+      
+      xml: 
+        name: MaterialLibraryViewMaterialRsp
+    
+    MaterialLibraryVoiceInfo:
+      type: object
+      properties:
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件id"
+          
+      
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+      xml: 
+        name: MaterialLibraryVoiceInfo
+    
+    MaterialLibraryVoiceprint:
+      type: object
+      properties:
+        src:
+          type: string
+          example: 'G:/lijian_storage/202105141/202105141_7d699f8f96ae4e7a9af6653f4b35446a.wav'
+          description: "文件路径"
+          
+      
+        vector:
+          type: string
+          example: ''
+          description: "声纹向量"
+          
+      
+        file_id:
+          type: integer
+          example: 1
+          format: int64
+          description: "文件id"
+          
+      
+        file_name:
+          type: string
+          example: 'xx.wav'
+          description: "文件名称"
+          
+      
+      xml: 
+        name: MaterialLibraryVoiceprint
+    
+    MiddlewareOperatingRecordData:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ''
+      
+        extra:
+          type: array
+          example: null
+          items: 
+            type: string
+            example: ''
+      
+      xml: 
+        name: MiddlewareOperatingRecordData
+    
+    OrganizationAddOrganizationReq:
+      type: object
+      properties:
+        parent_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "上级ID，根级为0"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+      xml: 
+        name: OrganizationAddOrganizationReq
+    
+    OrganizationDeleteOrganizationReq:
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+      xml: 
+        name: OrganizationDeleteOrganizationReq
+    
+    OrganizationEditOrganizationReq:
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        parent_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "上级ID，根级为0"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+      xml: 
+        name: OrganizationEditOrganizationReq
+    
+    OrganizationListOrganizationRsp:
+      type: object
+      properties:
+        organization_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/OrganizationOrganizationInfo'
+          description: "组织列表"
+          
+      
+      xml: 
+        name: OrganizationListOrganizationRsp
+    
+    OrganizationOrganizationInfo:
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        parent_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "上级ID，根级为0"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+      xml: 
+        name: OrganizationOrganizationInfo
+    
+    Resp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: Resp
+    
+    RespAudioAnalysisAudioClusterResultRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/AudioAnalysisAudioClusterResultRsp'
+      
+      xml: 
+        name: RespAudioAnalysisAudioClusterResultRsp
+    
+    RespAudioAnalysisAudioCondenseResultRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/AudioAnalysisAudioCondenseResultRsp'
+      
+      xml: 
+        name: RespAudioAnalysisAudioCondenseResultRsp
+    
+    RespAudioAnalysisVoiceSeparationResultRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/AudioAnalysisVoiceSeparationResultRsp'
+      
+      xml: 
+        name: RespAudioAnalysisVoiceSeparationResultRsp
+    
+    RespDeployControlAlarmAlarmDetailsRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/DeployControlAlarmAlarmDetailsRsp'
+      
+      xml: 
+        name: RespDeployControlAlarmAlarmDetailsRsp
+    
+    RespDeployControlAlarmListAlarmRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/DeployControlAlarmListAlarmRsp'
+      
+      xml: 
+        name: RespDeployControlAlarmListAlarmRsp
+    
+    RespDeployControlTaskAddTaskRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/DeployControlTaskAddTaskRsp'
+      
+      xml: 
+        name: RespDeployControlTaskAddTaskRsp
+    
+    RespDeployControlTaskDeleteTaskRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespDeployControlTaskDeleteTaskRsp
+    
+    RespDeployControlTaskListTaskRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/DeployControlTaskListTaskRsp'
+      
+      xml: 
+        name: RespDeployControlTaskListTaskRsp
+    
+    RespDeployControlTaskRevokeTaskRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespDeployControlTaskRevokeTaskRsp
+    
+    RespDeployControlTaskTaskDetailsRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/DeployControlTaskTaskDetailsRsp'
+      
+      xml: 
+        name: RespDeployControlTaskTaskDetailsRsp
+    
+    RespFileBatchUploadProgressRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileBatchUploadProgressRsp'
+      
+      xml: 
+        name: RespFileBatchUploadProgressRsp
+    
+    RespFileCancelUploadRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespFileCancelUploadRsp
+    
+    RespFileDeleteFileRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespFileDeleteFileRsp
+    
+    RespFileDownloadRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileDownloadRsp'
+      
+      xml: 
+        name: RespFileDownloadRsp
+    
+    RespFileGetFileBySrcRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileGetFileBySrcRsp'
+      
+      xml: 
+        name: RespFileGetFileBySrcRsp
+    
+    RespFileGetFileRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileGetFileRsp'
+      
+      xml: 
+        name: RespFileGetFileRsp
+    
+    RespFileGetVoiceWaveformBySrcRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileGetVoiceWaveformBySrcRsp'
+      
+      xml: 
+        name: RespFileGetVoiceWaveformBySrcRsp
+    
+    RespFileGetVoiceWaveformRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileGetVoiceWaveformRsp'
+      
+      xml: 
+        name: RespFileGetVoiceWaveformRsp
+    
+    RespFileHistoryFileRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileHistoryFileRsp'
+      
+      xml: 
+        name: RespFileHistoryFileRsp
+    
+    RespFileUploadProgressRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileUploadProgressRsp'
+      
+      xml: 
+        name: RespFileUploadProgressRsp
+    
+    RespFileUploadRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/FileUploadRsp'
+      
+      xml: 
+        name: RespFileUploadRsp
+    
+    RespHistoryRecordDeleteHistoryRecordRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespHistoryRecordDeleteHistoryRecordRsp
+    
+    RespHistoryRecordListHistoryRecordRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/HistoryRecordListHistoryRecordRsp'
+      
+      xml: 
+        name: RespHistoryRecordListHistoryRecordRsp
+    
+    RespHistoryRecordRecordDetailsRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/HistoryRecordRecordDetailsRsp'
+      
+      xml: 
+        name: RespHistoryRecordRecordDetailsRsp
+    
+    RespMaterialLibraryAddMaterialsRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespMaterialLibraryAddMaterialsRsp
+    
+    RespMaterialLibraryClusterUploadRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespMaterialLibraryClusterUploadRsp
+    
+    RespMaterialLibraryDeleteMaterialRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespMaterialLibraryDeleteMaterialRsp
+    
+    RespMaterialLibraryListMaterialRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/MaterialLibraryListMaterialRsp'
+      
+      xml: 
+        name: RespMaterialLibraryListMaterialRsp
+    
+    RespMaterialLibraryViewMaterialRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/MaterialLibraryViewMaterialRsp'
+      
+      xml: 
+        name: RespMaterialLibraryViewMaterialRsp
+    
+    RespOrganizationAddOrganizationRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespOrganizationAddOrganizationRsp
+    
+    RespOrganizationDeleteOrganizationRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespOrganizationDeleteOrganizationRsp
+    
+    RespOrganizationEditOrganizationRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespOrganizationEditOrganizationRsp
+    
+    RespOrganizationListOrganizationRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/OrganizationListOrganizationRsp'
+      
+      xml: 
+        name: RespOrganizationListOrganizationRsp
+    
+    RespRoleAddRoleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespRoleAddRoleRsp
+    
+    RespRoleDeleteRoleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespRoleDeleteRoleRsp
+    
+    RespRoleEditRoleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespRoleEditRoleRsp
+    
+    RespRoleListPermissionRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/RoleListPermissionRsp'
+      
+      xml: 
+        name: RespRoleListPermissionRsp
+    
+    RespRoleListRoleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/RoleListRoleRsp'
+      
+      xml: 
+        name: RespRoleListRoleRsp
+    
+    RespSampleLibraryBatchSampleRegisterRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/SampleLibraryBatchSampleRegisterRsp'
+      
+      xml: 
+        name: RespSampleLibraryBatchSampleRegisterRsp
+    
+    RespSampleLibraryDeleteSampleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespSampleLibraryDeleteSampleRsp
+    
+    RespSampleLibraryGetSampleDetailsRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/SampleLibraryGetSampleDetailsRsp'
+      
+      xml: 
+        name: RespSampleLibraryGetSampleDetailsRsp
+    
+    RespSampleLibraryListSampleRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/SampleLibraryListSampleRsp'
+      
+      xml: 
+        name: RespSampleLibraryListSampleRsp
+    
+    RespSampleLibrarySampleRegisterRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/SampleLibrarySampleRegisterRsp'
+      
+      xml: 
+        name: RespSampleLibrarySampleRegisterRsp
+    
+    RespSearchBySoundSearchVoiceRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/SearchBySoundSearchVoiceRsp'
+      
+      xml: 
+        name: RespSearchBySoundSearchVoiceRsp
+    
+    RespUserAddUserRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserAddUserRsp
+    
+    RespUserChangePasswordRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserChangePasswordRsp
+    
+    RespUserDeleteUserRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserDeleteUserRsp
+    
+    RespUserEditUserRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserEditUserRsp
+    
+    RespUserGetUserRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/UserGetUserRsp'
+      
+      xml: 
+        name: RespUserGetUserRsp
+    
+    RespUserListOperatingRecordRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/UserListOperatingRecordRsp'
+      
+      xml: 
+        name: RespUserListOperatingRecordRsp
+    
+    RespUserListUserRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/UserListUserRsp'
+      
+      xml: 
+        name: RespUserListUserRsp
+    
+    RespUserLoginRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/UserLoginRsp'
+      
+      xml: 
+        name: RespUserLoginRsp
+    
+    RespUserLogoutRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserLogoutRsp
+    
+    RespUserResetPasswordRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespUserResetPasswordRsp
+    
+    RespVoiceCompareListSampleLibraryFileRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/VoiceCompareListSampleLibraryFileRsp'
+      
+      xml: 
+        name: RespVoiceCompareListSampleLibraryFileRsp
+    
+    RespVoiceCompareVoiceCompareMoreRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/VoiceCompareVoiceCompareMoreRsp'
+      
+      xml: 
+        name: RespVoiceCompareVoiceCompareMoreRsp
+    
+    RespVoiceCompareVoiceCompareMoreThanMoreRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/VoiceCompareVoiceCompareMoreThanMoreRsp'
+      
+      xml: 
+        name: RespVoiceCompareVoiceCompareMoreThanMoreRsp
+    
+    RespVoiceCompareVoiceCompareOneRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/VoiceCompareVoiceCompareOneRsp'
+      
+      xml: 
+        name: RespVoiceCompareVoiceCompareOneRsp
+    
+    RespVoiceTagAddTagRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespVoiceTagAddTagRsp
+    
+    RespVoiceTagEditTagRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+      xml: 
+        name: RespVoiceTagEditTagRsp
+    
+    RespVoiceTagListTagRsp:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+          example: false
+      
+        errorId:
+          type: string
+          example: ''
+      
+        errorDesc:
+          type: string
+          example: ''
+      
+        data:
+          $ref: '#/components/schemas/VoiceTagListTagRsp'
+      
+      xml: 
+        name: RespVoiceTagListTagRsp
+    
+    RoleAddRoleReq:
+      type: object
+      properties:
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        permission_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "权限ID列表"
+          
+      
+      xml: 
+        name: RoleAddRoleReq
+    
+    RoleDeleteRoleReq:
+      type: object
+      properties:
+        role_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "角色ID"
+          
+      
+      xml: 
+        name: RoleDeleteRoleReq
+    
+    RoleEditRoleReq:
+      type: object
+      properties:
+        role_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "角色ID"
+          
+      
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        permission_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "权限ID列表"
+          
+      
+      xml: 
+        name: RoleEditRoleReq
+    
+    RoleListPermissionRsp:
+      type: object
+      properties:
+        permission_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/RolePermissionInfo'
+          description: "权限列表"
+          
+      
+      xml: 
+        name: RoleListPermissionRsp
+    
+    RoleListRoleReq:
+      type: object
+      properties:
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: RoleListRoleReq
+    
+    RoleListRoleRsp:
+      type: object
+      properties:
+        role_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/RoleRoleInfo'
+          description: "角色列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本库总数目"
+          
+      
+      xml: 
+        name: RoleListRoleRsp
+    
+    RolePermissionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "权限ID"
+          
+      
+        parent_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "父级ID，0为顶级"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "名称"
+          
+      
+        code:
+          type: string
+          example: ''
+          description: "标识"
+          
+      
+      xml: 
+        name: RolePermissionInfo
+    
+    RoleRoleInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "角色ID"
+          
+      
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        permission_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "权限ID列表"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+        update_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "更新时间"
+          
+      
+      xml: 
+        name: RoleRoleInfo
+    
+    SampleLibraryBatchSampleRegisterReq:
+      type: object
+      properties:
+        sample_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/SampleLibraryRegisterSampleInfo'
+          description: "样本列表"
+          
+      
+      xml: 
+        name: SampleLibraryBatchSampleRegisterReq
+    
+    SampleLibraryBatchSampleRegisterRsp:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本id"
+          
+      
+      xml: 
+        name: SampleLibraryBatchSampleRegisterRsp
+    
+    SampleLibraryDeleteSampleReq:
+      type: object
+      properties:
+        id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "样本id列表"
+          
+      
+      xml: 
+        name: SampleLibraryDeleteSampleReq
+    
+    SampleLibraryGetSampleDetailsReq:
+      type: object
+      properties:
+        sample_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本id"
+          
+      
+      xml: 
+        name: SampleLibraryGetSampleDetailsReq
+    
+    SampleLibraryGetSampleDetailsRsp:
+      type: object
+      properties:
+        sample_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本id"
+          
+      
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "姓名"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别，男(male)/女(female)"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "文件名"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件id"
+          
+      
+        src:
+          type: string
+          example: ''
+          description: "文件路径"
+          
+      
+      xml: 
+        name: SampleLibraryGetSampleDetailsRsp
+    
+    SampleLibraryListSampleReq:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "姓名"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别，男(male)/女(female)"
+          
+      
+        create_begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间-开始"
+          
+      
+        create_end:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间-结束"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: SampleLibraryListSampleReq
+    
+    SampleLibraryListSampleRsp:
+      type: object
+      properties:
+        voice_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/SampleLibrarySampleInfo'
+          description: "声纹列表"
+          
+      
+        totalCount:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数"
+          
+      
+      xml: 
+        name: SampleLibraryListSampleRsp
+    
+    SampleLibraryRegisterSampleInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ''
+          description: "姓名"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频文件id"
+          
+      
+      xml: 
+        name: SampleLibraryRegisterSampleInfo
+    
+    SampleLibrarySampleInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "声纹id"
+          
+      
+        code:
+          type: string
+          example: ''
+          description: "编号"
+          
+      
+        name:
+          type: string
+          example: ''
+          description: "姓名"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别，男(male)/女(female)"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频文件id"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+      xml: 
+        name: SampleLibrarySampleInfo
+    
+    SampleLibrarySampleRegisterReq:
+      type: object
+      properties:
+        person_name:
+          type: string
+          example: ''
+          description: "人员姓名"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别：男性(male)/女性(female)"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频文件id"
+          
+      
+      xml: 
+        name: SampleLibrarySampleRegisterReq
+    
+    SampleLibrarySampleRegisterRsp:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本id"
+          
+      
+      xml: 
+        name: SampleLibrarySampleRegisterRsp
+    
+    SearchBySoundResultInfo:
+      type: object
+      properties:
+        begin_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间(ms)"
+          
+      
+        end_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间(ms)"
+          
+      
+        poss:
+          type: number
+          example: 0
+          format: float
+          description: "置信度"
+          
+      
+      xml: 
+        name: SearchBySoundResultInfo
+    
+    SearchBySoundSearchFileInfo:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件id"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "语种"
+          
+      
+        duration:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频时长(ms)"
+          
+      
+        result_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/SearchBySoundResultInfo'
+          description: "搜索结果列表"
+          
+      
+      xml: 
+        name: SearchBySoundSearchFileInfo
+    
+    SearchBySoundSearchVoiceReq:
+      type: object
+      properties:
+        search_file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "检索音频id列表"
+          
+      
+        compare_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "比对音频id"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum: YES/NO"
+          
+      
+      xml: 
+        name: SearchBySoundSearchVoiceReq
+    
+    SearchBySoundSearchVoiceRsp:
+      type: object
+      properties:
+        search_file_info_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/SearchBySoundSearchFileInfo'
+          description: "检索音频信息列表"
+          
+      
+        compare_language:
+          type: string
+          example: ''
+          description: "比对音频语种"
+          
+      
+        compare_file_name:
+          type: string
+          example: ''
+          description: "文件名称"
+          
+      
+      xml: 
+        name: SearchBySoundSearchVoiceRsp
+    
+    UserAddUserReq:
+      type: object
+      properties:
+        username:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        password:
+          type: string
+          example: ''
+          description: "密码"
+          
+      
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        role_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "角色ID"
+          
+      
+        remark:
+          type: string
+          example: ''
+          description: "备注"
+          
+      
+      xml: 
+        name: UserAddUserReq
+    
+    UserChangePasswordReq:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        old_password:
+          type: string
+          example: ''
+          description: "旧密码"
+          
+      
+        new_password:
+          type: string
+          example: ''
+          description: "新密码"
+          
+      
+        confirm_password:
+          type: string
+          example: ''
+          description: "确认密码"
+          
+      
+      xml: 
+        name: UserChangePasswordReq
+    
+    UserDeleteUserReq:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+      xml: 
+        name: UserDeleteUserReq
+    
+    UserEditUserReq:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        username:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        role_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "角色ID"
+          
+      
+        remark:
+          type: string
+          example: ''
+          description: "备注"
+          
+      
+      xml: 
+        name: UserEditUserReq
+    
+    UserGetUserReq:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+      xml: 
+        name: UserGetUserReq
+    
+    UserGetUserRsp:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        username:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        super:
+          type: integer
+          example: 0
+          format: int64
+          description: "超理账号"
+          
+      
+        remark:
+          type: string
+          example: ''
+          description: "备注"
+          
+      
+        organization_info:
+          $ref: '#/components/schemas/OrganizationOrganizationInfo'
+          description: "组织信息"
+          
+      
+        role_info:
+          $ref: '#/components/schemas/RoleRoleInfo'
+          description: "角色信息"
+          
+      
+      xml: 
+        name: UserGetUserRsp
+    
+    UserListOperatingRecordReq:
+      type: object
+      properties:
+        user_name:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        action:
+          type: string
+          example: ''
+          description: "操作类型"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: UserListOperatingRecordReq
+    
+    UserListOperatingRecordRsp:
+      type: object
+      properties:
+        record_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/UserOperatingRecordInfo'
+          description: "操作记录列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本库总数目"
+          
+      
+      xml: 
+        name: UserListOperatingRecordRsp
+    
+    UserListUserReq:
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "组织ID"
+          
+      
+        user_name:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: UserListUserReq
+    
+    UserListUserRsp:
+      type: object
+      properties:
+        user_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/UserUserInfo'
+          description: "用户列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本库总数目"
+          
+      
+      xml: 
+        name: UserListUserRsp
+    
+    UserLoginReq:
+      type: object
+      properties:
+        username:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        password:
+          type: string
+          example: ''
+          description: "密码"
+          
+      
+      xml: 
+        name: UserLoginReq
+    
+    UserLoginRsp:
+      type: object
+      properties:
+        token:
+          type: string
+          example: ''
+          description: "凭据"
+          
+      
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        username:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        super:
+          type: integer
+          example: 0
+          format: int64
+          description: "超理账号"
+          
+      
+        remark:
+          type: string
+          example: ''
+          description: "备注"
+          
+      
+        organization_info:
+          $ref: '#/components/schemas/OrganizationOrganizationInfo'
+          description: "组织信息"
+          
+      
+        role_info:
+          $ref: '#/components/schemas/RoleRoleInfo'
+          description: "角色信息"
+          
+      
+        permission_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/RolePermissionInfo'
+          description: "权限列表"
+          
+      
+      xml: 
+        name: UserLoginRsp
+    
+    UserOperatingRecordInfo:
+      type: object
+      properties:
+        user_name:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        organization_name:
+          type: string
+          example: ''
+          description: "组织名"
+          
+      
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        action:
+          type: string
+          example: ''
+          description: "操作类型"
+          
+      
+        content:
+          $ref: '#/components/schemas/MiddlewareOperatingRecordData'
+          description: "操作内容"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+      xml: 
+        name: UserOperatingRecordInfo
+    
+    UserResetPasswordReq:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        new_password:
+          type: string
+          example: ''
+          description: "新密码"
+          
+      
+        confirm_password:
+          type: string
+          example: ''
+          description: "确认密码"
+          
+      
+      xml: 
+        name: UserResetPasswordReq
+    
+    UserUserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "用户ID"
+          
+      
+        user_name:
+          type: string
+          example: ''
+          description: "用户名"
+          
+      
+        organization_name:
+          type: string
+          example: ''
+          description: "组织名"
+          
+      
+        role_name:
+          type: string
+          example: ''
+          description: "角色名"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "创建时间"
+          
+      
+        update_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "更新时间"
+          
+      
+      xml: 
+        name: UserUserInfo
+    
+    VoiceCompareCompareResultInfo:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件id"
+          
+      
+        score:
+          type: number
+          example: 0
+          format: double
+          description: "比对分数"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "音频文件名称"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "语种"
+          
+      
+        compare_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "比对时间"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "比对库，SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "性别，male(男)/female(女)"
+          
+      
+      xml: 
+        name: VoiceCompareCompareResultInfo
+    
+    VoiceCompareCompareVoice:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "比对音频ID"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "比对音频名称"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "比对音频语种"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "比对音频性别，male(男)/female(女)"
+          
+      
+        compare_result_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/VoiceCompareCompareResultInfo'
+          description: "比对结果列表"
+          
+      
+      xml: 
+        name: VoiceCompareCompareVoice
+    
+    VoiceCompareListSampleLibraryFileReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id搜索"
+          
+      
+        sample_library_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本库id筛选"
+          
+      
+        page:
+          type: integer
+          example: 0
+          format: int64
+          description: "页码"
+          
+      
+        count:
+          type: integer
+          example: 0
+          format: int64
+          description: "单页个数"
+          
+      
+      xml: 
+        name: VoiceCompareListSampleLibraryFileReq
+    
+    VoiceCompareListSampleLibraryFileRsp:
+      type: object
+      properties:
+        sample_file_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/VoiceCompareSampleFileInfo'
+          description: "音频信息列表"
+          
+      
+        total_count:
+          type: integer
+          example: 0
+          format: int64
+          description: "总数"
+          
+      
+      xml: 
+        name: VoiceCompareListSampleLibraryFileRsp
+    
+    VoiceCompareSampleFileInfo:
+      type: object
+      properties:
+        voice_print_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "声纹id"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "音频id"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "音频名称"
+          
+      
+        sample_library_name:
+          type: string
+          example: ''
+          description: "样本库名称"
+          
+      
+        create_time:
+          type: integer
+          example: 0
+          format: int64
+          description: "入库时间"
+          
+      
+      xml: 
+        name: VoiceCompareSampleFileInfo
+    
+    VoiceCompareVoiceCompareMoreReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum:YES/NO"
+          
+      
+        is_gender_identify:
+          type: string
+          example: ''
+          description: "是否性别识别 enum: YES/NO"
+          
+      
+        compare_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "比对音频id"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "比对库，ALL(全部)/SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareMoreReq
+    
+    VoiceCompareVoiceCompareMoreRsp:
+      type: object
+      properties:
+        compare_result_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/VoiceCompareCompareResultInfo'
+          description: "比对结果列表"
+          
+      
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "比对音频ID"
+          
+      
+        file_name:
+          type: string
+          example: ''
+          description: "比对音频名称"
+          
+      
+        language:
+          type: string
+          example: ''
+          description: "比对音频语种"
+          
+      
+        gender:
+          type: string
+          example: ''
+          description: "比对音频性别，male(男)/female(女)"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareMoreRsp
+    
+    VoiceCompareVoiceCompareMoreThanMoreReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum:YES/NO"
+          
+      
+        is_gender_identify:
+          type: string
+          example: ''
+          description: "是否性别识别 enum: YES/NO"
+          
+      
+        compare_file_id_list:
+          type: array
+          example: null
+          items: 
+            type: integer
+            example: 0
+            format: int64
+          description: "比对音频id列表"
+          
+      
+        library:
+          type: string
+          example: ''
+          description: "比对库，ALL(全部)/SAMPLE(样本库)/MATERIAL(检材库)"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareMoreThanMoreReq
+    
+    VoiceCompareVoiceCompareMoreThanMoreRsp:
+      type: object
+      properties:
+        compare_voice_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/VoiceCompareCompareVoice'
+          description: "比对音频列表"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareMoreThanMoreRsp
+    
+    VoiceCompareVoiceCompareOneReq:
+      type: object
+      properties:
+        task_name:
+          type: string
+          example: ''
+          description: "任务名称"
+          
+      
+        is_language_identify:
+          type: string
+          example: ''
+          description: "是否语种识别 enum: YES/NO"
+          
+      
+        is_gender_identify:
+          type: string
+          example: ''
+          description: "是否性别识别 enum: YES/NO"
+          
+      
+        material_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "检材音频id"
+          
+      
+        sample_file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "样本音频id"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareOneReq
+    
+    VoiceCompareVoiceCompareOneRsp:
+      type: object
+      properties:
+        material_file_name:
+          type: string
+          example: ''
+          description: "检材音频名称"
+          
+      
+        material_language:
+          type: string
+          example: ''
+          description: "检材语种"
+          
+      
+        material_gender:
+          type: string
+          example: ''
+          description: "检材性别，male(男)/female(女)"
+          
+      
+        sample_file_name:
+          type: string
+          example: ''
+          description: "样本音频名称"
+          
+      
+        sample_language:
+          type: string
+          example: ''
+          description: "样本语种"
+          
+      
+        sample_gender:
+          type: string
+          example: ''
+          description: "样本性别，male(男)/female(女)"
+          
+      
+        score:
+          type: number
+          example: 0
+          format: double
+          description: "算法得分"
+          
+      
+      xml: 
+        name: VoiceCompareVoiceCompareOneRsp
+    
+    VoiceTagAddTagReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        content:
+          type: string
+          example: ''
+          description: "内容"
+          
+      
+      xml: 
+        name: VoiceTagAddTagReq
+    
+    VoiceTagEditTagReq:
+      type: object
+      properties:
+        tag_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "标注ID"
+          
+      
+        content:
+          type: string
+          example: ''
+          description: "内容"
+          
+      
+      xml: 
+        name: VoiceTagEditTagReq
+    
+    VoiceTagListTagReq:
+      type: object
+      properties:
+        file_id:
+          type: integer
+          example: 0
+          format: int64
+          description: "文件ID"
+          
+      
+      xml: 
+        name: VoiceTagListTagReq
+    
+    VoiceTagListTagRsp:
+      type: object
+      properties:
+        tag_list:
+          type: array
+          example: null
+          items: 
+            $ref: '#/components/schemas/VoiceTagtagInfo'
+          description: "标注列表"
+          
+      
+      xml: 
+        name: VoiceTagListTagRsp
+    
+    VoiceTagtagInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+          format: int64
+          description: "标注ID"
+          
+      
+        begin:
+          type: integer
+          example: 0
+          format: int64
+          description: "开始时间"
+          
+      
+        end:
+          type: integer
+          example: 0
+          format: int64
+          description: "结束时间"
+          
+      
+        content:
+          type: string
+          example: ''
+          description: "内容"
+          
+      
+      xml: 
+        name: VoiceTagtagInfo
+    
