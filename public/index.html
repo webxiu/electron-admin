@@ -7,7 +7,9 @@
   <script>
     const remote = require('electron').remote;
     Reflect.set(window, '$$', remote.getGlobal('$$'));
-    document.title=$$.AppInfo.appName
+
+    /** 设置任务栏应用标题 */
+    document.title=$$.appName
   </script>
 </head>
 

@@ -1,5 +1,8 @@
 const path = require('path');
 const AntdTheme = require('./src/Render/assets/css/antd/theme.js');
+const PackageJson = require('./package.json');
+const __PackageJson = JSON.parse(JSON.stringify(PackageJson));
+const language = __PackageJson.build.nsis.installerLanguages; //'zh-CN' 'en-US'
 
 const JoinCwd = (...args) => {
   if (!args.length) {
@@ -63,7 +66,7 @@ module.exports = {
       //中文:打包语言
       appLang: 'zh-CN',
       //中文:打包图标
-      appIcon: 'public/assets/favicon/png/favicon@5x.png'
+      appIcon: 'public/assets/favicon/png/favicon_ch@5x.png'
     },
     en: {
       appName: 'Sea And Sky',

@@ -170,7 +170,7 @@
           "target": "zip"
         }
       ],
-      "icon": "public/assets/favicon/png/favicon@5x.png"
+      "icon": "public/assets/favicon/png/favicon_ch@5x.png"
     },
     "mac": {
       "icon": "public/assets/favicon/icons/favicon@5x.icns"
