@@ -8,16 +8,16 @@ export type MenuItemTypes = {
 
 export const menuList: MenuItemTypes[] = [
   {
-    key: 'preprocess',
+    key: 'dashboard',
     title: '音频预处理',
-    path: '/home/preprocess',
+    path: '/home/dashboard',
     icon: require('@/Render/assets/img/menu/menu_preprocess.png').default,
     icon_on: require('@/Render/assets/img/menu/menu_preprocess_on.png').default
   },
   {
-    key: 'cluster',
+    key: 'manage',
     title: '声纹聚类',
-    path: '/home/cluster',
+    path: '/home/manage',
     icon: require('@/Render/assets/img/menu/menu_cluster.png').default,
     icon_on: require('@/Render/assets/img/menu/menu_cluster_on.png').default
   },

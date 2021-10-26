@@ -166,10 +166,21 @@ module.exports = {
             options: {
               sourceMap: true,
               lessOptions: {
-                // 可再此处配置全局样式, 如果使用less-loader@5，请移除 lessOptions 这一级直接配置选项。
-                modifyVars: config.antdTheme,
                 javascriptEnabled: true
               }
+            }
+          },
+          /** less全局变量 */
+          {
+            loader: 'style-resources-loader',
+            options: {
+              // globOptions: {},
+              /** 导入资源的路径，绝对路径, 导入多个patterns可以为一个数组 */
+              patterns: Core.JoinCwd('src', 'Render/assets/css/style.less'),
+              /** prepend 和 append 样式资源导入在之前还是之后，后导入会覆盖前面导入的 */
+              injector: 'append',
+              /** 是否允许@import形式导入，默认true */
+              resolveUrl: true
             }
           }
         ]

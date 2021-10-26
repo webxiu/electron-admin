@@ -52,10 +52,10 @@ const PackingWithAuth: React.FC = ({ children }) => {
 export const RootRouter = () => (
   <PackingWithAuth>
     <Layout>
-      <Route path="/home" exact component={() => <Redirect to="/home/preprocess" />}></Route>
-      <Route path="/home/preprocess" exact component={lazy(() => import('@/Render/pages/Home/VoicePreprocess'))}></Route>
-      <Route path="/home/cluster" exact component={lazy(() => import('@/Render/pages/Home/VoiceprintCluster'))}></Route>
-      <Route path="/home/onestop" exact component={lazy(() => import('@/Render/pages/Home/OneStopProcess'))}></Route>
+      <Route path="/home" exact component={() => <Redirect to="/home/dashboard" />}></Route>
+      <Route path="/home/dashboard" exact component={lazy(() => import('@/Render/pages/Home/Dashboard'))}></Route>
+      <Route path="/home/manage" exact component={lazy(() => import('@/Render/pages/Home/Manage'))}></Route>
+      <Route path="/home/onestop" exact component={lazy(() => import('@/Render/pages/Home/OneStop'))}></Route>
     </Layout>
   </PackingWithAuth>
 );

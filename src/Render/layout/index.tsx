@@ -1,3 +1,4 @@
+import Footer from './Navigation/Footer';
 import Header from './Navigation/Header';
 import Menu from './Navigation/Menu';
 import React from 'react';
@@ -10,12 +11,13 @@ export const Wrap: React.FC = ({ children }) => {
   return (
     <section className="layout ui-vw-100 ui-vh-100 flex-col">
       <Header />
-      <div className="flex flex-1">
+      <div className="flex flex-1 ui-ovy-a">
         <Menu />
         <main className={`flex-1 flex ui-w-100 ui-h-100 ui-ov-h`}>
           <div className="main-layout flex ui-ovy-a ui-w-100 ui-h-100">{children}</div>
         </main>
       </div>
+      <Footer />
     </section>
   );
 };
