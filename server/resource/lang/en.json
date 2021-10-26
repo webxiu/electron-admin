@@ -1,9 +1,0 @@
-{
-  "voice_denoise": "Denoising",
-  "voice_toneup": "Gain",
-  "voice_condense": "Concentration",
-  "voice_separation": "Voice",
-  "voice_combine": "Combine Voice",
-  "mono_track": "Mono Track",
-  "multi_track": "Multi Track"
-}

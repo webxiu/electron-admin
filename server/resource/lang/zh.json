@@ -1,9 +1,0 @@
-{
-  "voice_denoise": "降噪",
-  "voice_toneup": "增益",
-  "voice_condense": "浓缩",
-  "voice_separation": "人声",
-  "voice_combine": "合并音频",
-  "mono_track": "单声道",
-  "multi_track": "多声道"
-}

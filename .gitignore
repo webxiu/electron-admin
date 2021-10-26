@@ -21,7 +21,7 @@
 .buildVersion.json
 
 /server/logs/*
-/server/windows_microservices/*
+/server/*
 /server/data/local.db
 /server/windows_microservices/log/*
 *.log
