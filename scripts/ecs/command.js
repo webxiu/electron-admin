@@ -8,6 +8,7 @@ const childProcess = require('child_process');
 const WebpackDevServer = require('webpack-dev-server');
 const MainProcessWebpackConfig = require('./webpack/Main/webpack.config.js');
 const RenderProcessWebpackConfig = require('./webpack/Render/webpack.config.js');
+const net = require('net');
 
 class Command extends EventEmitter {
   constructor() {
@@ -30,8 +31,24 @@ class Command extends EventEmitter {
     );
   }
 
+  /** 检测端口占用 */
+  portIsOccupied(port, callback) {
+    const server = net.createServer().listen(port);
+    server.on('listening', () => {
+      server.close();
+      callback(null, port);
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        this.portIsOccupied(port + 1, callback);
+      } else {
+        callback(err);
+      }
+    });
+  }
+
   /** Readme */
-  childProcessExec (runPath) {
+  childProcessExec(runPath) {
     const _childProcess = childProcess.exec(runPath);
     _childProcess.stdout.on('data', console.info);
     _childProcess.stdout.on('error', console.info);
@@ -40,7 +57,7 @@ class Command extends EventEmitter {
   }
 
   /** Readme */
-  async RenderProcess () {
+  async RenderProcess() {
     const compiler = webpack(RenderProcessWebpackConfig);
     compiler.hooks &&
       compiler.hooks.done.tapAsync({ name: 'CompiledRenderProcessOnce' }, (compilation, callback) => {
@@ -59,11 +76,14 @@ class Command extends EventEmitter {
       overlay: { errors: true, warnings: true },
       ...userDevServer
     };
-    new WebpackDevServer(compiler, devServerOptions).listen(config.port + 1);
+
+    this.portIsOccupied(config.port, (err, checkPort) => {
+      new WebpackDevServer(compiler, devServerOptions).listen(checkPort + 1);
+    });
   }
 
   /** Readme */
-  async MainProcess () {
+  async MainProcess() {
     const compiler = webpack(MainProcessWebpackConfig);
     compiler.hooks.done.tapAsync({ name: 'CompiledMainProcessOnce' }, (compilation, callback) => {
       if (!this.AutoOpenApp._MainProcessDone) this.AutoOpenApp._MainProcessDone = true;
@@ -76,18 +96,18 @@ class Command extends EventEmitter {
   }
 
   /** Readme */
-  build () {
+  build() {
     process.env.NODE_ENV = 'production';
-    this.autoVersion()
+    this.autoVersion();
     this.MainProcess();
     this.RenderProcess();
     this.once('builddone', () => {
-      this.builder()
+      this.builder();
     });
   }
 
   /** Readme */
-  builder () {
+  builder() {
     switch (process.platform) {
       case 'win32':
         shell.exec('electron-builder --win --ia32');
@@ -105,7 +125,7 @@ class Command extends EventEmitter {
   }
 
   /** Readme */
-  start () {
+  start() {
     process.env.NODE_ENV = 'development';
     this.once('openApp', () => {
       this.app();
@@ -116,7 +136,7 @@ class Command extends EventEmitter {
   }
 
   /** Readme */
-  help () {
+  help() {
     console.log(`
     Command:    node electron-cli-service
 
@@ -125,13 +145,13 @@ class Command extends EventEmitter {
   }
 
   /** Readme */
-  kill () {
+  kill() {
     shell.exec(`taskkill /f /t /im electron.exe`);
     shell.exec(`taskkill /f /t /im ${pkg.build.productName}.exe`);
   }
 
   /** Readme */
-  app () {
+  app() {
     if (config.nodemon) {
       this.childProcessExec(`nodemon -e js,ts,tsx -w dist -w package.json -w index.js --exec electron . --inspect`);
     } else {
@@ -140,12 +160,12 @@ class Command extends EventEmitter {
   }
 
   /** Extends */
-  autoVersion () {
+  autoVersion() {
     require('../run/auto-version');
   }
 
   /** Extends */
-  autoService () {
+  autoService() {
     require('../run/auto-service');
   }
 }
