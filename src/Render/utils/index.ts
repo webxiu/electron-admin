@@ -1,9 +1,6 @@
-/**
- * @Author yejiang1015
- * @Date 2020-04-19 22:04:04
- * @Last Modified by: yejiang1015
- * @Last Modified time: 2020-08-28 10:55:24
- */
+import moment from 'moment';
+
+/** 工具函数 */
 
 export default {
   /**
@@ -81,7 +78,8 @@ export default {
    */
   validHost(host: string) {
     // eslint-disable-next-line no-useless-escape
-    const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$/;
+    const reg =
+      /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$/;
     return reg.test(host);
   },
 
@@ -93,5 +91,67 @@ export default {
   isValidIP(ip) {
     const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
     return reg.test(ip);
+  },
+  /**
+   * 时间转时间戳
+   * @param time Array 开始时间-结束时间
+   * @returns Object 返回时间范围00:00:00 - 23:59:59的毫秒数
+   */
+  formatRangePicker(time: moment.Moment[]) {
+    const begin_time = time?.length ? time[0].startOf('day').valueOf() : 0;
+    const end_time = time?.length ? time[1].endOf('day').valueOf() : 0;
+    return { begin_time, end_time };
+  },
+
+  /**
+   * 时间回显处理(将开始时间设置为参数字段)
+   * @param storageValue 本地存储的提交参数
+   * @param startTimeField 开始时间字段
+   * @param endTimeField 结束时间字段
+   * @returns antd时间框回显Moment数组与时间提交参数:
+   */
+  formatRecordTime(params, startTimeField: string, endTimeField: string) {
+    let showParams = {}; // 表单回显参数
+    let submitParams = {}; // 表单提交参数
+    if (params[startTimeField]?.length) {
+      const time = params[startTimeField];
+      const showTime = [moment(time[0], 'YYYY-MM-DD'), moment(time[1], 'YYYY-MM-DD')];
+      const { begin_time, end_time } = this.formatRangePicker([moment(time[0], 'YYYY-MM-DD HH:mm:ss'), moment(time[1], 'YYYY-MM-DD HH:mm:ss')]);
+      showParams = {
+        [startTimeField]: showTime
+      };
+      submitParams = {
+        [startTimeField]: begin_time,
+        [endTimeField]: end_time
+      };
+    }
+    return { showParams, submitParams };
+  },
+
+  /**
+   * 下载文件
+   * @param blob 下载文件blob
+   * @param fileName 文件名
+   */
+  downLoadFile(blob: Blob, fileName: string) {
+    const link = document.createElement('a');
+    const evt = document.createEvent('HTMLEvents');
+    evt.initEvent('click', false, false);
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  },
+  /**
+   * 获取地址栏参数
+   * @param url 地址
+   * @returns 参数对象
+   */
+  getUrlParameters(url: string): any {
+    const params = url.match(/([^?=&]+)(=([^&]*))/g) || [];
+    const res = params.reduce((a, v) => ((a[v.slice(0, v.indexOf('='))] = v.slice(v.indexOf('=') + 1)), a), {});
+    return res;
   }
 };
