@@ -33,8 +33,6 @@ const Wrap: React.FC = () => {
 
   const onFinish = (values: LoginType) => {
     const { username, password, remember } = values;
-    /** 设置接口服务地址 */
-    Setting.SetSettings({ serverAddr: 'http://localhost:5002' });
     login({ username: username.trim(), password } as login$$Request)
       .then(({ data }) => {
         const res: login$$Response = data?.data;

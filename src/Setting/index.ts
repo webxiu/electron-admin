@@ -8,9 +8,7 @@ const DefaultLocalSetting: SettingTypes = {
   devTools: false,
   clickTotal: 0,
   hotUpdater: false,
-  serverAddr: 'http://localhost:5002',
-  gitee: 'https: //gitee.com/xieyejiang/electron',
-  github: 'https://github.com/xeajs/electron'
+  serverAddr: 'http://localhost:5002'
 };
 
 export default DefaultLocalSetting;
