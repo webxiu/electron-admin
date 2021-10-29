@@ -42,7 +42,7 @@ export const Wrap: React.FC = (props) => {
     });
   };
   return (
-    <span className="cursor" onClick={changeLanguage}>
+    <span className="cursor" style={{ color: 'var(--grey)' }} onClick={changeLanguage}>
       {lang[changeLang]}
     </span>
   );

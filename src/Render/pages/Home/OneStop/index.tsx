@@ -8,7 +8,7 @@ const Wrap: React.FC = () => {
     <div>
       <div className="box">
         一站式处理
-        <Button type="primary" onClick={() => push('/home')}>
+        <Button type="primary" onClick={() => push('/login')}>
           退出
         </Button>
       </div>

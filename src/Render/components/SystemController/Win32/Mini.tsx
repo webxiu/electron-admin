@@ -16,17 +16,15 @@ const Wrap: React.FC = () => {
       </span>
       <style jsx>{`
         span {
-          margin-right: 5px;
-          padding: 6px 12px;
+          padding: 0 16px;
           display: flex;
           justify-content: center;
           width: auto;
           align-items: center;
           background-color: transparent;
-          border-radius: 6px;
         }
         span:hover {
-          background: rgba(255, 255, 255, 0.15);
+          background-color: #afa4a5;
         }
       `}</style>
     </>

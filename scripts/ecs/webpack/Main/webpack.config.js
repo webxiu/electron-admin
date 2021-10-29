@@ -88,7 +88,6 @@ module.exports = {
       http: 'require("http")',
       crypto: 'require("crypto")',
       child_process: 'require("child_process")',
-      '@spk/cert-checker-x64': 'require("@spk/cert-checker-x64").default',
       '@spk/chkdog-X64': 'require("@spk/chkdog-X64").default'
     },
     /public\/.+$/

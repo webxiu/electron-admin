@@ -44,7 +44,8 @@ export const Header: React.FC<Props> = (props) => {
       <style jsx>{`
         .sidebar {
           width: 56px;
-          background: #2b2c2d;
+          background: #fff;
+          margin: 5px 10px;
         }
         .sidebar-item {
           margin-top: 22px;

@@ -8,7 +8,7 @@ const Wrap: React.FC = () => {
     <div>
       <div className="box">
         声纹聚类
-        <Button type="primary" onClick={() => push('/home')}>
+        <Button type="primary" onClick={() => push('/login')}>
           退出
         </Button>
       </div>

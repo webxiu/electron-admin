@@ -3,7 +3,7 @@ import { remote } from 'electron';
 
 const Wrap: React.FC = () => {
   const __size__ = 16;
-  const __color__ = '#fff';
+  const __color__ = '#92929D';
   const [color, setColor] = React.useState<string>(__color__);
   const onFunc = () => {
     remote.getCurrentWindow().close();
@@ -32,16 +32,15 @@ const Wrap: React.FC = () => {
       </span>
       <style jsx>{`
         span {
-          padding: 6px 12px;
+          padding: 0 16px;
           display: flex;
           justify-content: center;
           width: auto;
           align-items: center;
           background-color: transparent;
-          border-radius: 6px;
         }
         span:hover {
-          background: rgba(206, 91, 83, 0.25);
+          background-color: #afa4a5;
         }
       `}</style>
     </>

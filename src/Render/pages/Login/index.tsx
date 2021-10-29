@@ -1,6 +1,6 @@
-import { Button, Checkbox, Form, Input, message } from 'antd';
+import { Button, Checkbox, Form, Input, message, Radio, Space, Tabs } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Radio, Space, Tabs } from 'antd';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { getLoginInfo, removeLoginInfo, setLoginInfo, setUserInfo } from '@/Render/utils/auth';
 import { login, login$$Request, login$$Response } from '@/Render/service';
@@ -114,67 +114,33 @@ const Wrap: React.FC = () => {
             left: 50%;
             transform: translate(-50%, -50%);
           }
-          .login-name {
-            color: #fff;
-            font-size: 30px;
-            text-align: center;
-          }
+
           .login-box {
-            width: 490px;
+            width: 360px;
             display: flex;
             align-items: center;
             flex-direction: column;
             box-sizing: border-box;
           }
-          .login-form {
-            width: 65%;
-          }
+
           .login-title {
             color: #d4c2c2;
             font-size: 26px;
             text-align: center;
             padding: 20px 0;
           }
+          .login-form {
+            width: 100%;
+          }
           .form-input {
-            color: #4e87cc;
             width: 100%;
             border-radius: 4px;
             height: 40px;
           }
-          .form-checkbox {
-            color: #fff;
-          }
 
-          .login-form .ant-input {
-            background: transparent;
-            color: #ccc;
-            margin-left: 10px;
-          }
           .submit-btn {
             width: 100%;
             height: 40px;
-          }
-
-          .login-form .ant-form-item-has-error .ant-input,
-          .ant-form-item-has-error .ant-input-affix-wrapper,
-          .ant-form-item-has-error .ant-input:hover,
-          .ant-form-item-has-error .ant-input-affix-wrapper:hover {
-            background: #01155e;
-          }
-          .login-form .ant-input-affix-wrapper {
-            background: #01155e;
-            border: 1px solid #153f8c;
-          }
-          .login-form .ant-form-item-control {
-            width: 100%;
-          }
-          .login-form .ant-checkbox-inner {
-            background: #01155e;
-            border-color: #153f8c;
-          }
-          .login-form input::-webkit-input-placeholder {
-            color: #4f5580;
-            font-size: 12px;
           }
         `}</style>
       </div>

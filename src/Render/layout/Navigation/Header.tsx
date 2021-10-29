@@ -93,7 +93,7 @@ export const Header: React.FC<Props> = (props) => {
           position: relative;
           height: 52px;
           overflow: hidden;
-          background: #4e4e4e;
+          background: #404040;
         }
         .control-group {
           display: flex;
@@ -113,7 +113,7 @@ export const Header: React.FC<Props> = (props) => {
           height: 100%;
         }
         .control-btn:hover {
-          background: #000000 !important;
+          background: #c49191 !important;
         }
       `}</style>
     </header>
