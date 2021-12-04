@@ -36,7 +36,7 @@ module.exports = smp({
       path: 'require("path")',
       http: 'require("http")',
       child_process: 'require("child_process")',
-      '@spk/Wave-Graph-X64': 'require("@spk/Wave-Graph-X64").default',
+      // '@spk/Wave-Graph-X64': 'require("@spk/Wave-Graph-X64").default',
       './dist/WaveGraph.node': 'require("./src/Render/package/Wave-Graph-X64/dist/WaveGraph.node")'
     }
   ],
