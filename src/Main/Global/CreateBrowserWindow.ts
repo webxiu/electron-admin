@@ -2,7 +2,7 @@
  * @Msg nativeImage.createFromPath png 或者 jpg
  */
 
-import { BrowserWindow, IpcMainEvent, app, dialog, ipcMain, nativeImage } from 'electron';
+import { BrowserWindow, IpcMainEvent, app, dialog, ipcMain, nativeImage, protocol } from 'electron';
 
 const pkg = require('~/package.json');
 
@@ -14,10 +14,23 @@ ipcMain.once('CreateBrowserWindow', (event: IpcMainEvent & { href: string }) => 
   const faviconProPath = `resources/app.asar.unpacked/public/assets/favicon/favicon.png`;
   const faviconDevPath = `public/assets/favicon/favicon.png`;
   const faviconPath = $$.JoinDirWithRoot($$.isPro() ? faviconProPath : faviconDevPath);
-  const NewBrowserWindowOptions: Electron.BrowserWindowConstructorOptions = { ...pkg.window, icon: nativeImage.createFromPath(faviconPath) };
+  const NewBrowserWindowOptions = { ...pkg.window, icon: nativeImage.createFromPath(faviconPath) };
   const _BrowserWindow = new BrowserWindow(NewBrowserWindowOptions);
   _BrowserWindow.loadURL(event.href);
   Reflect.set(global, 'CreateBrowserWindow', _BrowserWindow);
+  //===========自定义file:///协议的解析=======================
+  protocol.interceptFileProtocol(
+    'file',
+    (req, callback) => {
+      const url = req.url.substr(8);
+      callback(decodeURI(url));
+    },
+    (error) => {
+      if (error) {
+        console.error('Failed to register protocol');
+      }
+    }
+  );
   /**
    * @platform darwin Mac 平台关闭按钮不退出
    * @Msg 创建窗口后监听窗口关闭，区分平台

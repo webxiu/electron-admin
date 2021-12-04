@@ -20,8 +20,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "~4.3.0",
-    "@spk/Wave-Graph-X64": "^1.0.28",
+    "@spk/Wave-Graph-X64": "^1.0.32",
     "@spk/audioplayer": "^0.2.2",
+    "@types/mousetrap": "^1.6.8",
     "antd": "^4.15.0",
     "axios": "~0.21.0",
     "babel-polyfill": "~6.26.0",
@@ -39,6 +40,7 @@
     "mobx": "~5.15.7",
     "mobx-react": "~6.3.1",
     "mobx-react-router": "~4.1.0",
+    "mousetrap": "^1.6.5",
     "nedb": "~1.8.0",
     "pubsub-js": "^1.9.3",
     "react": "~17.0.0",

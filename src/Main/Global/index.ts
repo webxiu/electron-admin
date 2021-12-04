@@ -28,7 +28,7 @@ export default () => {
   require('./AppGuard');
 
   /** HotUpdater */
-  require('./AutoUpdate');
+  // require('./AutoUpdate');
 
   /** EventHandle */
   require('./EventHandle');

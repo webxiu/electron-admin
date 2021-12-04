@@ -1,0 +1,27 @@
+{
+  "name": "@spk/Wave-Graph-X64",
+  "version": "1.0.28",
+  "description": "WaveGraph",
+  "dependencies": {
+    "@types/node": "8.0.3"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "rebuild64": "electron-rebuild -f --win  x64 -v 9.0.0",
+    "rebuild64D": "electron-rebuild -f --debug --win  x64 -v 9.0.0",
+    "rebuild32": "electron-rebuild -f --win  --arch=ia32 -v 9.0.0",
+    "rebuild32D": "electron-rebuild -f --debug --win  --arch=ia32 -v 9.0.0"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^1.8.6",
+    "node-addon-api": "^3.1.0",
+    "node-gyp": "^6.1.0"
+  },
+  "files": [
+    "dist",
+    "conf",
+    "*.dll",
+    "*.js",
+    "*.ts"
+  ]
+}

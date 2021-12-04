@@ -29,7 +29,7 @@ export const Header: React.FC<Props> = (props) => {
       <style jsx>{`
         .sidebar {
           width: 56px;
-          background: #fff;
+          background: var(--menuColor);
           margin: 5px 10px;
         }
         .sidebar-item {

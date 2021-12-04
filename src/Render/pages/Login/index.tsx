@@ -1,6 +1,5 @@
-import { Button, Checkbox, Form, Input, message, Radio, Space, Tabs } from 'antd';
+import { Button, Checkbox, Form, Input, Radio, Space, Tabs, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-
 import React, { useEffect, useRef, useState } from 'react';
 import { getLoginInfo, removeLoginInfo, setLoginInfo, setUserInfo } from '@/Render/utils/auth';
 import { login, login$$Request, login$$Response } from '@/Render/service';

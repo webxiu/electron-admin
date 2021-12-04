@@ -102,6 +102,30 @@ export default {
     const end_time = time?.length ? time[1].endOf('day').valueOf() : 0;
     return { begin_time, end_time };
   },
+  /**
+   * 时间戳转时分秒
+   * @param times number
+   * @param fmt string
+   * @returns string
+   */
+  toHHmmss(time: number, fmt = 'HH:mm:ss') {
+    const ms = isNaN(parseInt(`${time}`)) ? 0 : time;
+    const seconds = Math.floor(ms / 1000);
+    let timeArr: number[] = [];
+    const hours = seconds / 60 / 60,
+      minutes = (seconds / 60) % 60,
+      lastSeconds = seconds % 60,
+      millisecond = ms % 1000;
+
+    timeArr = [parseInt(`${hours}`), parseInt(`${minutes}`), parseInt(`${lastSeconds}`)];
+
+    return timeArr
+      .join(':')
+      .concat('.' + parseInt(`${millisecond}`))
+      .replace(/\b(\d)\b/g, '0$1')
+      .replace(/[^:]*$/, (s) => s.padStart(3, '0'))
+      .padEnd(12, '0');
+  },
 
   /**
    * 时间回显处理(将开始时间设置为参数字段)
@@ -126,6 +150,19 @@ export default {
       };
     }
     return { showParams, submitParams };
+  },
+
+  /**
+   * 判断拖拽文件类型
+   * @param event 拖拽事件
+   * @param dragType 拖拽类型 1.Files 拖入文件到窗口  2.窗口内部dom元素拖拽定义的key
+   */
+  getDargType(event: React.DragEvent, dragType: 'Files' | string) {
+    const type = event.dataTransfer?.types;
+    if (type && type[0] === dragType) {
+      return true;
+    }
+    return false;
   },
 
   /**
