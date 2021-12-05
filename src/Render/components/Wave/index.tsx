@@ -715,7 +715,7 @@ class Wave extends Component<TProps, TState> {
     if (endX) {
       waveUtil.drawOnePixelLineTo(this.bgCtx, endX, Ystart, endX, this.mainWaveHeight, lineColor, lineWidth);
     }
-    this.bgCtx.fillRect(startX, 8, endX - startX, this.mainWaveHeight);
+    this.bgCtx.fillRect(startX, 0, endX - startX, this.mainWaveHeight);
   };
 
   /** 连续绘制多个区域 */
