@@ -22,7 +22,7 @@ const Wrap: React.FC = () => {
   const showSmartSign = true;
   const showManualSign = true;
   const isResultReload = true;
-  const activeFileId = '1';
+  const activeFileId = '12';
   const voiceInfo: { voiceid: number; voicePath: string; fileName: string } = {
     voiceid: 0,
     fileName: '14彭辉_1.wav',
