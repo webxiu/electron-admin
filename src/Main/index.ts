@@ -52,32 +52,32 @@ const wakeOrCreate = () => {
     require('./Application');
   });
 
-  let dirName = path.join(__dirname, '../server'); // 根目录
-  if (dirName.includes('app.asar') || dirName.includes('app')) {
-    dirName = path.join(__dirname, '../../../server');
-  }
+  // let dirName = path.join(__dirname, '../server'); // 根目录
+  // if (dirName.includes('app.asar') || dirName.includes('app')) {
+  //   dirName = path.join(__dirname, '../../../server');
+  // }
 
-  const voiceFiles = _WorkPath('voiceFiles');
-  const localDBPath = _WorkPath('db');
-  /** 请求接口语言设置 */
-  const langStr = $$.language.replace(/-/, '_'); // 'zh-CN' 'en-US'
-  const startLanguage = { zh_CN: 'zh', en_US: 'en' };
+  // const voiceFiles = _WorkPath('voiceFiles');
+  // const localDBPath = _WorkPath('db');
+  // /** 请求接口语言设置 */
+  // const langStr = $$.language.replace(/-/, '_'); // 'zh-CN' 'en-US'
+  // const startLanguage = { zh_CN: 'zh', en_US: 'en' };
 
-  /** 启动算法服务 */
-  const guoyinlijian = child_process.spawn(
-    path.join(dirName, 'guoyinlijian.exe'),
-    [':5002', path.join(localDBPath, './local.db'), voiceFiles, path.join(localDBPath, './logs'), startLanguage[langStr]],
-    { cwd: path.join(dirName) }
-  );
+  // /** 启动算法服务 */
+  // const guoyinlijian = child_process.spawn(
+  //   path.join(dirName, 'guoyinlijian.exe'),
+  //   [':5002', path.join(localDBPath, './local.db'), voiceFiles, path.join(localDBPath, './logs'), startLanguage[langStr]],
+  //   { cwd: path.join(dirName) }
+  // );
 
-  guoyinlijian.stdout.on('data', (data) => {
-    console.log('guoyinlijian data:', data.toString());
-  });
+  // guoyinlijian.stdout.on('data', (data) => {
+  //   console.log('guoyinlijian data:', data.toString());
+  // });
 
-  guoyinlijian.on('close', (code) => {
-    console.error('guoyinlijian log:', '服务关闭');
-    guoyinlijian.kill('SIGTERM');
-  });
+  // guoyinlijian.on('close', (code) => {
+  //   console.error('guoyinlijian log:', '服务关闭');
+  //   guoyinlijian.kill('SIGTERM');
+  // });
 };
 
 gotTheLock ? wakeOrCreate() : app.quit();

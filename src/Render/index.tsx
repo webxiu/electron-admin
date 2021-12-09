@@ -1,4 +1,5 @@
 import '@/Render/assets/css/style.less';
+import 'rsuite/styles/index.less';
 
 import App from '@/Render/routes';
 import ReactDOM from 'react-dom';

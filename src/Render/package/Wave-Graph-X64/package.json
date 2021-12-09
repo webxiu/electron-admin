@@ -1,6 +1,6 @@
 {
   "name": "@spk/Wave-Graph-X64",
-  "version": "1.0.28",
+  "version": "1.0.25",
   "description": "WaveGraph",
   "dependencies": {
     "@types/node": "8.0.3"
