@@ -71,7 +71,7 @@ const Wrap: React.FC = () => {
         cascade={false}
         renderMenuItem={(itemLabel, item) => {
           console.log(`itemLabel, item`, itemLabel, item);
-          return <span className={item.children?.length === 0 ? 'top' : ''}>{itemLabel}=99</span>;
+          return <span className={item.children?.length === 0 ? 'top' : ''}>{itemLabel}</span>;
         }}
       />
       <hr />
