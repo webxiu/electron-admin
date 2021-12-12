@@ -27,5 +27,12 @@ export const menuList: MenuItemTypes[] = [
     path: '/home/onestop',
     icon: require('@/Render/assets/img/menu/menu_onestop.png').default,
     icon_on: require('@/Render/assets/img/menu/menu_onestop_on.png').default
+  },
+  {
+    key: 'media',
+    title: '媒体',
+    path: '/home/media',
+    icon: require('@/Render/assets/img/menu/menu_setting.png').default,
+    icon_on: require('@/Render/assets/img/menu/menu_setting_on.png').default
   }
 ];

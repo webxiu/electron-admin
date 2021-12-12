@@ -38,7 +38,7 @@ const Wrap: React.FC = () => {
       <Button type="primary" onClick={() => push('/login')}>
         退出
       </Button>
-      <Wave
+      {/* <Wave
         ref={waveRef}
         smartSign={condenseSlice}
         showAddBtn={showAddBtn}
@@ -84,7 +84,7 @@ const Wrap: React.FC = () => {
           { label: '1.5x', value: 1.5 },
           { label: '2.0x', value: 2 }
         ]}
-      />
+      /> */}
     </div>
   );
 };

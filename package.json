@@ -44,7 +44,8 @@
     "react-dom": "~17.0.0",
     "react-router": "~5.2.0",
     "react-router-dom": "~5.2.0",
-    "rsuite": "^5.2.4"
+    "rsuite": "^5.2.4",
+    "yarn": "^1.22.17"
   },
   "devDependencies": {
     "@babel/core": "^7.10.0",
