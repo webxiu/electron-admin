@@ -1,6 +1,7 @@
 import { Button, Cascader, TreeSelect } from 'antd';
 import React, { useEffect, useState } from 'react';
 
+import CascaderLast from '@/Render/components/CascaderLast';
 import moment from 'moment';
 import { useHistory } from 'react-router';
 
@@ -113,6 +114,8 @@ const Wrap: React.FC = () => {
     }
   };
 
+  const [rcValue, setRcValue] = useState<number[]>([]);
+
   return (
     <div>
       <div className="box">
@@ -146,7 +149,7 @@ const Wrap: React.FC = () => {
           onTreeExpand={(...arg) => {
             console.log(`onTreeExpand`, arg);
           }}
-          multiple
+          // multiple
           defaultActiveFirstOption={true}
           changeOnSelect
           expandTrigger={'click'}
@@ -160,6 +163,9 @@ const Wrap: React.FC = () => {
             return <span>{value}9898=</span>;
           }}
         />
+        <hr />
+        RCCascader
+        <CascaderLast />
         <hr />
         <TreeSelect {...tProps} />
       </div>

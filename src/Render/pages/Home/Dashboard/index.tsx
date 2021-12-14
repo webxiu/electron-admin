@@ -1,11 +1,12 @@
 import './index.less';
 
 import React, { useRef } from 'react';
-import Wave, { SignProps } from '@/Render/components/Wave';
 
 import { Button } from 'antd';
 import path from 'path';
 import { useHistory } from 'react-router';
+
+// import Wave, { SignProps } from '@/Render/components/Wave';
 
 let dirName = path.join(__dirname, '../../../../../../public/assets/video/32k.wav');
 if (dirName.includes('app.asar') || dirName.includes('app')) {
@@ -15,19 +16,19 @@ if (dirName.includes('app.asar') || dirName.includes('app')) {
 console.log(`dirName`, dirName);
 const Wrap: React.FC = () => {
   const { push } = useHistory();
-  const waveRef = useRef<any>(null);
+  // const waveRef = useRef<any>(null);
 
-  const condenseSlice: any[] = [];
-  const showAddBtn = false;
-  const showSmartSign = true;
-  const showManualSign = true;
-  const isResultReload = true;
-  const activeFileId = '12';
-  const voiceInfo: { voiceid: number; voicePath: string; fileName: string } = {
-    voiceid: 0,
-    fileName: '14彭辉_1.wav',
-    voicePath: dirName
-  };
+  // const condenseSlice: any[] = [];
+  // const showAddBtn = false;
+  // const showSmartSign = true;
+  // const showManualSign = true;
+  // const isResultReload = true;
+  // const activeFileId = '12';
+  // const voiceInfo: { voiceid: number; voicePath: string; fileName: string } = {
+  //   voiceid: 0,
+  //   fileName: '14彭辉_1.wav',
+  //   voicePath: dirName
+  // };
 
   const getTimes = (totalTime: number) => {};
   const onSelectAreaChange = (start: number, end: number) => {};
@@ -38,7 +39,7 @@ const Wrap: React.FC = () => {
       <Button type="primary" onClick={() => push('/login')}>
         退出
       </Button>
-      <Wave
+      {/* <Wave
         ref={waveRef}
         smartSign={condenseSlice}
         showAddBtn={showAddBtn}
@@ -84,7 +85,7 @@ const Wrap: React.FC = () => {
           { label: '1.5x', value: 1.5 },
           { label: '2.0x', value: 2 }
         ]}
-      />
+      /> */}
     </div>
   );
 };
