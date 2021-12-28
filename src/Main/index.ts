@@ -52,16 +52,32 @@ const wakeOrCreate = () => {
     require('./Application');
   });
 
-  // let dirName = path.join(__dirname, '../server'); // 根目录
-  // if (dirName.includes('app.asar') || dirName.includes('app')) {
-  //   dirName = path.join(__dirname, '../../../server');
-  // }
+  let rootPath = path.join(__dirname, '../'); // 根目录
+  let dirName = path.join(__dirname, '../server'); // 接口服务目录
+  if (dirName.includes('app.asar') || dirName.includes('app')) {
+    dirName = path.join(__dirname, '../../../server');
+    rootPath = path.join(__dirname, '../../../');
+  }
+  Reflect.set($$, 'rootPath', rootPath);
 
-  // const voiceFiles = _WorkPath('voiceFiles');
-  // const localDBPath = _WorkPath('db');
-  // /** 请求接口语言设置 */
-  // const langStr = $$.language.replace(/-/, '_'); // 'zh-CN' 'en-US'
-  // const startLanguage = { zh_CN: 'zh', en_US: 'en' };
+  const voiceFiles = _WorkPath('voiceFiles');
+  const localDBPath = _WorkPath('db');
+  /** 请求接口语言设置 */
+  const langStr = $$.language.replace(/-/, '_'); // 'zh-CN' 'en-US'
+  const startLanguage = { zh_CN: 'zh', en_US: 'en' };
+
+  // const testapp = child_process.spawn(path.join(rootPath, 'server/testapp.exe'), [
+  //   '-addr',
+  //   ':5002',
+  //   '-db-path',
+  //   path.join(localDBPath, './local.db'),
+  //   '-file-path',
+  //   voiceFiles,
+  //   '-export-path',
+  //   exportPath,
+  //   '-log-path',
+  //   path.join(localDBPath, './logs')
+  // ]);
 
   // /** 启动算法服务 */
   // const guoyinlijian = child_process.spawn(

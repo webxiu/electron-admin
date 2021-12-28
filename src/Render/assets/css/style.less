@@ -11,6 +11,26 @@ body,
   background: @bgColor;
 }
 
+  /* 动画相关样式 */
+  .fade-enter{
+    opacity: 0;
+ }
+ .fade-exit{
+    opacity: 1;
+ }
+ .fade-enter-active{
+    opacity: 1;
+ }
+ .fade-exit-active{
+    opacity: 0;
+    transition: all 500ms;
+
+ }
+ .fade-enter-active,
+ .fade-exit-active{
+    transition: all 500ms;
+ }
+
 body {
 
   /*

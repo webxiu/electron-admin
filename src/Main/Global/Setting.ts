@@ -6,6 +6,7 @@
 import DefaultLocalSetting from '@/Setting';
 import _WorkPath from './_WorkPath';
 import fs from 'fs';
+import path from 'path';
 
 const PackageJson = require('../../../package.json');
 
@@ -54,10 +55,50 @@ const SettingSet = (settingInner = {}) => {
 /** 初始化 setting.json */
 SettingSet();
 
+/** 图谱 存储音频文件 */
+const setWaveFile = (fileName: string, buffer: Buffer) => {
+  const tempLocalPath = _WorkPath('tempDownloadFiles');
+  const voicePath = path.join(tempLocalPath, fileName);
+
+  if (tempLocalPath && fs.existsSync(tempLocalPath)) {
+    try {
+      fs.writeFileSync(voicePath, buffer, { encoding: 'utf8' });
+      return voicePath;
+    } catch (error) {
+      console.error('音频保存失败');
+      return '';
+    }
+  }
+  return '';
+};
+
+/** 图谱 获取音频文件 */
+const getWaveFile = (fileName) => {
+  const tempLocalPath = _WorkPath('tempDownloadFiles');
+  const voicePath = path.join(tempLocalPath, fileName);
+  if (tempLocalPath && fs.existsSync(tempLocalPath)) {
+    try {
+      const inner = fs.readFileSync(voicePath, { encoding: 'utf8' });
+      if (inner) {
+        return voicePath;
+      }
+    } catch (error) {
+      return '';
+    }
+  }
+  return '';
+};
+
 /** 挂载到全局 */
 Reflect.set($$, 'Settings', {
   read: SettingGet,
   write: SettingSet
+});
+
+/** 图谱 音频存储 */
+Reflect.set($$, 'waveVoice', {
+  write: setWaveFile,
+  read: getWaveFile
 });
 
 const __PackageJson = JSON.parse(JSON.stringify(PackageJson));

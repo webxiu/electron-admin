@@ -29,6 +29,8 @@ declare global {
   export namespace $$ {
     // 全局的语言变量
     const language: string;
+    /** 系统根目录 */
+    const rootPath: string;
     const isPro: () => boolean;
     const JoinDirWithRoot: (...dir) => string;
     const isString: (arg) => Boolean;
@@ -65,6 +67,10 @@ declare global {
     export namespace Settings {
       const read: () => SettingTypes | undefined;
       const write: (settingInner: Partial<SettingTypes>) => boolean;
+    }
+    export namespace waveVoice {
+      const read: (fileName: string) => string;
+      const write: (fileName: string, buffer: any) => string;
     }
     export namespace Event {
       const on: (eventName: AppEventNames, listener: ListenerType) => () => void;

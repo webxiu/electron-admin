@@ -2,8 +2,12 @@ import { Button, Cascader, TreeSelect } from 'antd';
 import React, { useEffect, useState } from 'react';
 
 import CascaderLast from '@/Render/components/CascaderLast';
+import fs from 'fs';
 import moment from 'moment';
+import path from 'path';
 import { useHistory } from 'react-router';
+
+const child_process = require('child_process');
 
 const { SHOW_PARENT } = TreeSelect;
 interface TreeNode {
@@ -92,12 +96,52 @@ const Wrap: React.FC = () => {
 
   const [treeList, setTreeList] = useState<string[]>(['0-0-0']);
 
-  console.log(`options`, options);
   useEffect(() => {
-    console.log(`selectList`, selectList);
+    // console.log(`selectList`, selectList);
+    call();
+
+    const cpuNums = require('os').cpus().length;
+    console.log(`cpuNums`, cpuNums);
   }, [selectList]);
 
   const { push } = useHistory();
+
+  const call = async () => {
+    const rootp = `C:`;
+    const authPath = `C:\\Users\\Hailen\\Desktop\\other\\auth`;
+    const openPath = `C:\\Users\\Hailen\\Desktop\\other\\open`;
+
+    const command = `takeown /f ${rootp}`;
+    // let code: number = 0;
+    // try {
+    //   child_process.exec(command);
+    // } catch (error) {
+    //   console.log(`error`, error);
+    //   code = 1;
+    // }
+    // console.log(`目录权限: `, code, '磁盘:', rootp);
+
+    try {
+      await getAuth(authPath);
+    } catch (error) {
+      console.log(`error`, error);
+    }
+  };
+
+  const getAuth = async (dir: string) => {
+    const command = `takeown /f ${dir} /r`;
+    console.log(`command`, command);
+    return new Promise<number>((resolve, reject) => {
+      const accessApp = child_process.exec(command);
+      accessApp.stdout.on('data', (data) => {
+        console.log('data:', data?.toString());
+      });
+      accessApp.on('close', (code) => {
+        console.log(`close18`, code);
+        code === 0 ? resolve(code) : reject(code);
+      });
+    });
+  };
 
   const tProps = {
     treeData,
@@ -155,7 +199,6 @@ const Wrap: React.FC = () => {
           expandTrigger={'click'}
           // tagRender={(props) => <span>{props.value}===</span>}
           dropdownRender={(menu) => {
-            console.log(`menu`, menu);
             return <span>{menu}自定义</span>;
           }}
           labelRender={(entity, value) => {
