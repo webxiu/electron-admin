@@ -2,9 +2,13 @@
  * @Msg nativeImage.createFromPath png 或者 jpg
  */
 
-import { BrowserWindow, IpcMainEvent, app, dialog, ipcMain, nativeImage, protocol } from 'electron';
+import { BrowserWindow, IpcMainEvent, Menu, Tray, app, dialog, ipcMain, nativeImage, protocol } from 'electron';
+
+import { AppEventNames } from '@/Types/EventTypes';
+import path from 'path';
 
 const pkg = require('~/package.json');
+global.globalData = { showCloseModal: true };
 
 ipcMain.once('CreateBrowserWindow', (event: IpcMainEvent & { href: string }) => {
   if (!event.href || typeof event.href !== 'string') {
@@ -56,6 +60,60 @@ ipcMain.once('CreateBrowserWindow', (event: IpcMainEvent & { href: string }) => 
    * 关闭窗口事件，如果是quit退出，则清除全局主窗口缓存实例， 否则隐藏窗口
    */
   if (process.platform === 'win32') {
-    /** TODO : */
+    /** 窗口关闭提醒 : */
+    _BrowserWindow.on('close', (e) => {
+      if (global.globalData.showCloseModal) {
+        e.preventDefault();
+        _BrowserWindow.show();
+        _BrowserWindow.webContents.send(AppEventNames.WINDOW_CLOSE);
+      }
+    });
   }
+
+  //系统托盘右键菜单 https://segmentfault.com/q/1010000012390487
+  const trayMenuTemplate = [
+    {
+      label: '设置app',
+      click: function () {} //打开相应页面
+    },
+    {
+      label: '意见反馈app',
+      click: function () {}
+    },
+    {
+      label: '帮助app',
+      click: function () {}
+    },
+    {
+      label: '关于app',
+      click: function () {}
+    },
+    {
+      label: '退出app',
+      click: function () {
+        //ipc.send('close-main-window');
+        app.quit();
+      }
+    }
+  ];
+
+  //系统托盘图标目录
+  const trayIcon = path.join(__dirname, '../public/assets/favicon/ico');
+
+  //图标的上下文菜单
+  const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
+
+  //创建系统托盘图标
+  const appTray = new Tray(path.join(trayIcon, 'favicon.ico'));
+
+  //设置此托盘图标的悬停提示内容
+  appTray.setToolTip('海阔天空');
+
+  //设置此图标的上下文菜单
+  appTray.setContextMenu(contextMenu);
+
+  //单点击 1.主窗口显示隐藏切换 2.清除闪烁
+  appTray.on('click', function () {
+    _BrowserWindow.show();
+  });
 });

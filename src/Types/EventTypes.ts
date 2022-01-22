@@ -1,4 +1,6 @@
 export enum AppEventNames {
+  /** 窗口关闭事件 */
+  WINDOW_CLOSE = 'WINDOW_CLOSE',
   /** AUTOUPDATER */
   AUTOUPDATER = 'AUTOUPDATER',
   /** openDirectory 选择文件夹目录 */

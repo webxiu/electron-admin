@@ -1,6 +1,7 @@
 import React, { Component, createRef } from 'react';
 
 import { Button } from 'antd';
+import SvgIcon from '@/Render/components/SvgIcon';
 
 const { desktopCapturer } = require('electron');
 export default class MediaRecord extends Component {
@@ -26,6 +27,10 @@ export default class MediaRecord extends Component {
   render() {
     return (
       <div className="box">
+        ====555
+        <SvgIcon iconName="message" fill="#00f" style={{ color: '#0f0' }} />
+        <SvgIcon iconName="notfound" />
+        <SvgIcon iconName="http://localhost:8006/images/notfound.svg" />
         {/* <video width={200} height={200} autoPlay controls ref={this.videoRef}></video>
         <div>
           <Button type="primary" onClick={this.startRecord}>

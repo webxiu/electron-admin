@@ -26,6 +26,15 @@ declare global {
   export const LANGUAGE: string;
   export type DirPath = string;
   export type FilePath = string;
+
+  module NodeJS {
+    interface Global {
+      globalData: {
+        showCloseModal: boolean;
+      };
+    }
+  }
+
   export namespace $$ {
     // 全局的语言变量
     const language: string;

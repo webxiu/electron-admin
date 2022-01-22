@@ -1,10 +1,44 @@
-import React from 'react';
-import { remote } from 'electron';
+import React, { useEffect, useRef, useState } from 'react';
+import { ipcRenderer, remote } from 'electron';
+
+import { AppEventNames } from '@/Types/EventTypes';
+import { Modal } from 'antd';
+import Package from '~/package.json';
+import { logout } from '@/Render/service';
 
 const Wrap: React.FC = () => {
   const __size__ = 16;
   const __color__ = '#92929D';
-  const [color, setColor] = React.useState<string>(__color__);
+  const showModal = useRef<boolean>(true);
+  const [color, setColor] = useState<string>(__color__);
+
+  useEffect(() => {
+    ipcRenderer.on(AppEventNames.WINDOW_CLOSE, onClose);
+    return () => {
+      ipcRenderer.removeListener(AppEventNames.WINDOW_CLOSE, onClose);
+    };
+  }, []);
+
+  const onClose = (ev, arg) => {
+    if (showModal.current) {
+      showModal.current = false;
+      Modal.confirm({
+        title: '提示',
+        centered: true,
+        content: <p className="ui-ta-c">您确认退出{Package.build.productName}系统？</p>,
+        onOk: () => {
+          logout({});
+          remote.getGlobal('globalData').showCloseModal = false;
+          remote.getCurrentWindow().close();
+        },
+        onCancel: () => {
+          showModal.current = true;
+        }
+      });
+    }
+  };
+
+  /** 仅触发关闭(兼容任务栏右键关闭), 再经过主进程 WINDOW_CLOSE事件处理关闭 */
   const onFunc = () => {
     remote.getCurrentWindow().close();
   };

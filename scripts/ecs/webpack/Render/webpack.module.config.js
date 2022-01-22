@@ -78,6 +78,7 @@ module.exports = {
           }
         ]
       },
+
       {
         test: /\.(woff|woff2|eot|ttf)$/,
         exclude: [Core.JoinCwd('node_modules')],
@@ -96,7 +97,7 @@ module.exports = {
       },
       {
         test: /\.jpe?g|png|gif|svg|ico$/,
-        exclude: [Core.JoinCwd('node_modules')],
+        exclude: [Core.JoinCwd('node_modules'), Core.JoinCwd('src', 'Render/assets/icons')],
         use: [
           {
             loader: 'url-loader',
@@ -111,6 +112,14 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.svg$/,
+        loader: "svg-sprite-loader",
+        include: Core.JoinCwd('src', 'Render/assets/icons'),
+        options: {
+          symbolId: "icon-[name]"
+        }
       },
       /** 处理第三方 less 样式 */
       {
