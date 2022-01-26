@@ -17,10 +17,10 @@ import atlas_sma from '@/Render/assets/img/wave/atlas_sma.png';
 import atlas_stop from '@/Render/assets/img/wave/atlas_stop.png';
 import { download } from '../../service';
 import fs from 'fs';
-import i18next from 'i18next';
 import more_signclose from '@/Render/assets/img/wave/more_signclose.png';
 import more_signopen from '@/Render/assets/img/wave/more_signopen.png';
 import path from 'path';
+import { t } from 'i18next';
 import { toJS } from 'mobx';
 import utils from '@/Render/utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -89,8 +89,6 @@ type TProps = {
   onDoubleClickSign?: (item: SignProps) => void;
   /** 双击智能标注，进行查看 */
   onDoubleClickSmartSign?: (item: SignProps) => void;
-  zoomRatios: { label: string; value: number }[];
-  playbackRates: { label: string; value: number }[];
   /** 是否显示添加按钮 */
   showAddBtn?: boolean;
   /** 是否显示智能标注栏 */
@@ -102,8 +100,6 @@ type TProps = {
   Global?: any;
   /** 音频绘制完成回调 */
   onDrawMainWaveFinish?: (params) => void;
-  /** 是否为Tab加载,Tab有多个音频时,窗口放大只加载当前选中图谱 */
-  isResultReload: boolean;
   /** 是否显示选区时间 */
   showSelectArea?: boolean;
   /** 智能标注区域的标注标题 */
@@ -131,9 +127,10 @@ type TState = {
   mainLoading: boolean;
   scanLoading: boolean;
   playbackRateVisible: boolean;
-  playbackRates: { label: string; value: number };
+  playbackRate: { label: string; value: number };
   /** 是否为合法文件 */
   isValidFile: boolean;
+  zoomRatio: number | string;
 };
 
 const noop = () => {};
@@ -185,7 +182,7 @@ class Wave extends Component<TProps, TState> {
   isManual = true;
   state = {
     playing: false,
-    zoom: 100,
+    zoom: waveConfig.zoomRatios[0].value,
     playCurrentTime: 0,
     addModalVisible: false,
     signName: '',
@@ -198,8 +195,9 @@ class Wave extends Component<TProps, TState> {
     mainLoading: false,
     scanLoading: false,
     playbackRateVisible: false,
-    playbackRates: waveConfig.playbackRates[2],
-    isValidFile: true
+    playbackRate: waveConfig.playbackRates[2],
+    isValidFile: true,
+    zoomRatio: waveConfig.zoomRatios[0].value
   };
   filePath = this.props.filePath || '';
   subToken = '';
@@ -208,6 +206,7 @@ class Wave extends Component<TProps, TState> {
   Maximize = false;
   isFirstUplod = true;
   yAxisWidth = 30;
+  xAxisStartMs = 0; // 图谱可视区域的开始时间(滚动变化)
 
   constructor(props) {
     super(props);
@@ -230,54 +229,40 @@ class Wave extends Component<TProps, TState> {
       this.pause();
     });
 
-    /** WAVE_ACTION 处理波形图 根据fileId订阅唯一的事件名称 */
-    const waveActionName = `WAVE_ACTION_${this.props.fileId}`;
-    PubSub.subscribe(`${waveActionName}`, (msg: string, data) => {
-      if (msg === waveActionName) {
-        this.waveAction(data);
-      }
+    PubSub.subscribe(AppEventNames.WAVE_ACTION, (msg: string, data) => {
+      this.waveAction(data);
     });
   }
 
   componentWillUnmount() {
     this.pause();
-    waveGraph.releaseDraw(this.waveId);
-    window.removeEventListener('resize', this.handleResize);
-    PubSub.unsubscribe(this.subToken);
-    PubSub.unsubscribe(`WAVE_ACTION_${this.props.fileId}`);
     cacheWaveId = {};
     Mousetrap.unbind('space');
+    waveGraph.releaseDraw(this.waveId);
+    PubSub.unsubscribe(this.subToken);
+    PubSub.unsubscribe(AppEventNames.WAVE_ACTION);
+    window.removeEventListener('resize', this.handleResize);
   }
 
   resize = () => {
     if (!this.state.isValidFile) return;
     this.Maximize = true;
-    const { fileId, activeFileId, isResultReload } = this.props;
-    if (isResultReload) {
-      if (activeFileId && fileId === Number(activeFileId)) {
-        this.initCanvas();
-        this.reDraw();
-        this.drawSign();
-        this.drawMultiSelectArea();
-      }
-    } else {
-      this.initCanvas();
-      this.reDraw();
-      this.drawSign();
-      this.drawMultiSelectArea();
-      if (this.selectStartMs > 0 && this.selectEndMs > 0) {
-        this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
-      }
+    this.initCanvas();
+    this.reDraw();
+    this.drawSign();
+    this.drawMultiSelectArea();
+    if (this.selectStartMs > 0 && this.selectEndMs > 0) {
+      this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
     }
   };
 
   componentDidUpdate(prevProps: TProps, prevState: TState) {
-    const { fileId, activeFileId, isResultReload } = this.props;
+    const { fileId, activeFileId } = this.props;
     if (!this.state.isValidFile) return;
     if (prevProps.activeFileId === activeFileId) {
       return;
     }
-    if (isResultReload && this.Maximize) {
+    if (this.Maximize) {
       if (activeFileId && fileId === Number(activeFileId)) {
         this.initCanvas();
         this.reDraw();
@@ -471,22 +456,25 @@ class Wave extends Component<TProps, TState> {
   // 绘制预览的滑块
   drawScanSlider = (startX = 0, setPrevStartX = true) => {
     const { zoom } = this.state;
-    const { scanMask, waveScanHeight } = waveConfig;
+    const { scanMask, waveScanHeight, selectSliderColor } = waveConfig;
     this.scanSliderWidth = this.mainWaveWidth / (zoom / 100);
     if (setPrevStartX) this.prevScanStartX = startX;
     this.currentScanStartX = startX;
     this.scanSliderCtx.clearRect(0, 0, this.mainWaveWidth, waveScanHeight);
     this.scanSliderCtx.strokeStyle = scanMask.borderColor;
     this.scanSliderCtx.fillStyle = scanMask.backgroundColor;
-    this.scanSliderCtx.lineWidth = 1;
+    this.scanSliderCtx.lineWidth = scanMask.lineWidth;
     this.scanSliderCtx.fillRect(startX, 0, this.scanSliderWidth, waveScanHeight);
-    this.scanSliderCtx.strokeRect(
-      startX + this.scanSliderCtx.lineWidth,
-      this.scanSliderCtx.lineWidth,
-      this.scanSliderWidth - this.scanSliderCtx.lineWidth * 2,
-      waveScanHeight - this.scanSliderCtx.lineWidth * 2
-    );
+    this.scanSliderCtx.strokeRect(startX + scanMask.lineWidth / 2, 1, this.scanSliderWidth - scanMask.lineWidth, waveScanHeight - scanMask.lineWidth);
     this.scanSliderCtx.stroke();
+
+    if (this.selectStartMs) {
+      this.scanSliderCtx.fillStyle = selectSliderColor;
+      const x = (this.selectStartMs / this.totalMs) * this.mainWaveWidth;
+      const w = ((this.selectEndMs - this.selectStartMs) / this.totalMs) * this.mainWaveWidth;
+      this.scanSliderCtx.fillRect(x, 0, w, waveScanHeight);
+      this.scanSliderCtx.stroke();
+    }
   };
 
   // 绘制主区域波形图
@@ -496,52 +484,6 @@ class Wave extends Component<TProps, TState> {
     const { yMap, Ystart, xMap, rgb, backgroudcolor, wavecolor } = waveConfig.mainWaveConfig;
     const startPx = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, startMs, zoom);
 
-    // 获取列
-    // const totalColumn = waveGraph.getTotalColumn(this.waveId);
-    // console.log(totalColumn, 'totalColumn');
-    // console.log(startPx, 'startPx');
-    // console.log(this.mainWaveWidth - startPx, totalColumn, 'totalColumn');
-
-    /** 动态获取y轴刻度高度 */
-    let sample = 0;
-    let segment = 4;
-    const yArr: Array<number> = [];
-    if (this.sampleRate % 3 === 0) {
-      segment = 3;
-      sample = Number((this.sampleRate / 3 / 1000).toFixed());
-    }
-    if (this.sampleRate % 4 === 0) {
-      segment = 4;
-      sample = Number((this.sampleRate / 4 / 1000).toFixed());
-    }
-
-    for (let i = 0; i < segment; i++) {
-      yArr.push(sample);
-      sample += sample;
-    }
-    const arrBottom = yArr.map((item) => -item);
-    const arrTop = yArr.reverse();
-    const yScales: Array<number> = [...arrTop, 0].concat(arrBottom);
-
-    // y轴网格
-    const height = this.mainWaveHeight || 160;
-    const dis = Math.floor(height / yScales.length);
-    let start = 0 + 13;
-    const yMaps: number[] = [];
-    for (let i = 0; i < yScales.length; i++) {
-      yMaps.push(start);
-      start += dis;
-    }
-
-    // x轴网格
-    const xScales = Math.ceil(this.mainWaveWidth / 14);
-    const xMaps: number[] = [];
-    let xStart = 0;
-    for (let i = 0; i < xScales; i++) {
-      xStart += xScales;
-      xMaps.push(xStart);
-    }
-
     return new Promise((resolve) => {
       const params = {
         waveId: this.waveId,
@@ -550,8 +492,8 @@ class Wave extends Component<TProps, TState> {
         columnCount: this.mainWaveWidth,
         width: this.mainWaveWidth,
         Ystart,
-        xMap: xMaps,
-        yMap: yMaps,
+        xMap,
+        yMap,
         rgb,
         backgroudcolor,
         wavecolor
@@ -604,6 +546,7 @@ class Wave extends Component<TProps, TState> {
       even && this.xAxisCtx.fillText(txt, x - waveUtil.getNowHeight(posX), 20);
       even = !even;
     }
+    this.xAxisStartMs = startMs;
   };
 
   // 绘制wave图的时间线
@@ -651,6 +594,12 @@ class Wave extends Component<TProps, TState> {
       this.drawMultiSelectArea();
       this.drawSelectArea(this.selectStartMs, this.selectEndMs, this.isManual, false);
       this.drawTimeLine(playX - hasMovedX, false);
+      /** playStartMs 会先播放一次才判断,所以此处给个比0秒稍大的值, hasMovedX:判断大于0的任意值均可,代表有放大区域移动 */
+      if (playStartMs < 2 && hasMovedX > 10) {
+        this.drawScanSlider(0);
+        this.drawXAxis(0);
+        this.drawMainWave(0);
+      }
       this.drawPlay();
       if (zoom !== 100) {
         this.drawSign();
@@ -671,7 +620,7 @@ class Wave extends Component<TProps, TState> {
           this.drawPlay();
         })
         .catch((e) => {
-          message.error(i18next.t('common:cannotPlay'));
+          message.error(t('common:cannotPlay'));
         });
     }, 100);
   };
@@ -695,6 +644,13 @@ class Wave extends Component<TProps, TState> {
     return playCurrentTime;
   };
 
+  pause = (playCurrentTime?: number) => {
+    playCurrentTime = playCurrentTime || this.initPlay();
+    this.audio?.pause();
+    if (this.animationId) window.cancelAnimationFrame(this.animationId);
+    this.setState({ playing: false, playCurrentTime });
+  };
+
   /** 绘制选中区域 */
   drawSelectArea = (startTime: number, endTime: number, isManual: boolean, clearnBg = true, signCate?: number) => {
     const { signsColors } = this.props;
@@ -716,6 +672,9 @@ class Wave extends Component<TProps, TState> {
       waveUtil.drawOnePixelLineTo(this.bgCtx, endX, Ystart, endX, this.mainWaveHeight, lineColor, lineWidth);
     }
     this.bgCtx.fillRect(startX, 0, endX - startX, this.mainWaveHeight);
+
+    const startScanX = (this.xAxisStartMs / this.totalMs) * this.mainWaveWidth;
+    isManual && this.drawScanSlider(startScanX, false);
   };
 
   /** 连续绘制多个区域 */
@@ -736,19 +695,22 @@ class Wave extends Component<TProps, TState> {
     const posPx = e.clientX - rect.left;
     const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
     this.selectStartMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posPx, this.state.zoom) + mainHasMovedMs;
-    // Global.setRegion({
-    //   ...Global.region,
-    //   begin_time: this.selectStartMs
-    // });
-    // Global.setTotalMs(this.totalMs);
-    bgWaveRef.current.addEventListener('mousemove', this.onBgMove);
+    Global.setRegion({
+      ...Global.region,
+      begin_time: this.selectStartMs
+    });
+    Global.setTotalMs(this.totalMs);
+    window.addEventListener('mouseup', this.onBgUp);
+    window.addEventListener('mousemove', this.onBgMove);
     this.pause();
   };
 
   onBgMove = (e) => {
-    const { Global } = this.props;
-    if (!this.isDrawing) return;
-    const rect = e.target.getBoundingClientRect();
+    // const { Global } = this.props;
+    const { bgWaveRef } = this.domRefs;
+    if (!this.isDrawing || !bgWaveRef.current) return;
+    const rect = bgWaveRef.current.getBoundingClientRect();
+
     const posLeftPx = e.clientX - rect.left;
     const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
     this.selectEndMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posLeftPx, this.state.zoom) + mainHasMovedMs;
@@ -765,13 +727,11 @@ class Wave extends Component<TProps, TState> {
     }
   };
 
-  onBgUp = (e, isUp = true) => {
-    const { bgWaveRef } = this.domRefs;
+  onBgUp = (e) => {
     const { Global } = this.props;
-
+    const { bgWaveRef } = this.domRefs;
     if (!bgWaveRef.current) return;
-    bgWaveRef.current.removeEventListener('mousemove', this.onBgMove);
-    if (!isUp) return;
+    const rect = bgWaveRef.current.getBoundingClientRect();
     this.onBgMove(e);
     this.isDrawing = false;
     if (this.selectStartMs > this.selectEndMs) {
@@ -779,14 +739,29 @@ class Wave extends Component<TProps, TState> {
       this.selectStartMs = this.selectEndMs;
       this.selectEndMs = temMs;
     }
-    // Global.setRegion({
-    //   ...Global.region,
-    //   begin_time: this.selectStartMs,
-    //   end_time: this.selectEndMs
-    // });
-    // Global.setTotalMs(this.totalMs);
-    this.props.onSelectAreaChange && this.props.onSelectAreaChange(this.selectStartMs, this.selectEndMs);
+
+    // 鼠标选区移出左边和右边的边界处理
+    if (e.clientX <= rect.left) {
+      this.selectStartMs = this.xAxisStartMs;
+    } else if (e.clientX >= rect.right) {
+      this.selectEndMs = this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth;
+    }
+
+    this.selectStartMs = Math.ceil(this.selectStartMs);
+    this.selectEndMs = Math.ceil(this.selectEndMs);
+
+    Global.setTotalMs(this.totalMs);
+    Global.setRegion({ ...Global.region, begin_time: this.selectStartMs, end_time: this.selectEndMs });
+    if (this.props.onSelectAreaChange) {
+      this.props.onSelectAreaChange(this.selectStartMs, this.selectEndMs);
+    }
+    window.removeEventListener('mouseup', this.onBgUp);
+    window.removeEventListener('mousemove', this.onBgMove);
   };
+
+  onZoomRatioChange(value) {
+    this.zoomChange('zoomIn', value);
+  }
 
   onWheel = (event) => {
     let delta = 1;
@@ -805,33 +780,48 @@ class Wave extends Component<TProps, TState> {
     }
   };
 
-  pause = (playCurrentTime?: number) => {
-    playCurrentTime = playCurrentTime || this.initPlay();
-    this.audio?.pause();
-    if (this.animationId) window.cancelAnimationFrame(this.animationId);
-    this.setState({ playing: false, playCurrentTime });
-  };
+  getZoomStartMs() {
+    const midMs = ((this.selectStartMs || this.xAxisStartMs) + (this.selectEndMs || this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth)) / 2;
+    const waveWidthMs = this.actualPerPxMeamMs * this.mainWaveWidth;
+    let startMS = midMs - waveWidthMs / 2;
+    if (startMS < 0 || this.state.zoom === 100) {
+      startMS = 0;
+    }
+    if (startMS + waveWidthMs > this.totalMs) {
+      startMS = this.totalMs - waveWidthMs;
+    }
+    return startMS;
+    // return a < 0 && (a = 0), a + waveTotalMs > this.totalMs && (a = this.totalMs - waveTotalMs), a;
+  }
 
-  zoomChange = (type: 'zoomIn' | 'zoomOut', nowZoom?: number) => {
+  zoomChange = utils.throttle((type: 'zoomIn' | 'zoomOut', nowZoom?: number) => {
     if (!this.state.isValidFile) return;
     const { onZoomChange } = this.props;
     const { zoom } = this.state;
     const changeZoom = type === 'zoomIn' ? waveConfig.zoomStep : -waveConfig.zoomStep;
     nowZoom = nowZoom ? nowZoom : zoom + changeZoom;
-    if (nowZoom < 100) return;
+    if (nowZoom < 100) nowZoom = 100;
+
+    this.setState({ zoomRatio: `${nowZoom}%` });
     onZoomChange && onZoomChange(nowZoom);
+
     this.setState({ zoom: nowZoom }, () => {
-      this.mainCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
       this.getWaveHead();
-      this.drawMainWave();
+      this.mainCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
+      const drawStartMs = this.getZoomStartMs();
+      const startScanX = (this.xAxisStartMs / this.totalMs) * this.mainWaveWidth;
+      /* 如果是全选从0开始缩放 */
+      const startXMs = this.selectStartMs === 0 && this.selectEndMs === this.totalMs ? 0 : drawStartMs;
+
+      this.drawMainWave(startXMs);
       this.xAxisCtx.clearRect(0, 0, this.mainWaveWidth, waveConfig.xAxisConfig.xAxisHeight);
-      this.drawXAxis(0);
-      this.drawScanSlider();
+      this.drawXAxis(startXMs);
+      this.drawScanSlider(startScanX, true);
       this.drawMultiSelectArea();
       this.drawSelectArea(this.selectStartMs, this.selectEndMs, true, false);
       this.drawSign();
     });
-  };
+  });
 
   signClick = (e, isManual = true) => {
     this.isManual = isManual;
@@ -900,7 +890,7 @@ class Wave extends Component<TProps, TState> {
   addSign = (signItem: SignProps) => {
     const hasSameName = this.signAll.some((k) => k.name === signItem.name);
     if (hasSameName) {
-      message.error({ content: i18next.t('common:repeatSignName'), duration: 1 });
+      message.error({ content: t('common:repeatSignName'), duration: 1 });
       return false;
     }
     const hasSameTimeArea = (isManual) => {
@@ -912,7 +902,7 @@ class Wave extends Component<TProps, TState> {
       });
     };
     if (hasSameTimeArea(true)) {
-      message.error({ content: i18next.t('common:hasSigned'), duration: 1 });
+      message.error({ content: t('common:hasSigned'), duration: 1 });
       return false;
     }
     signItem.id = uuidv4();
@@ -922,7 +912,7 @@ class Wave extends Component<TProps, TState> {
     this.drawSign();
     const manualSigns = this.signAll.filter((item) => item.isManual === true);
     this.setState({ manualSigns });
-    message.success({ content: i18next.t('common:addSignSucc'), duration: 1 });
+    message.success({ content: t('common:addSignSucc'), duration: 1 });
     return true;
   };
 
@@ -930,7 +920,7 @@ class Wave extends Component<TProps, TState> {
   editSign = (signItem: SignProps) => {
     const hasSameName = this.signAll.some((k) => k.isManual === signItem.isManual && k.name === signItem.name);
     if (hasSameName) {
-      message.error({ content: i18next.t('common:repeatSignName'), duration: 1 });
+      message.error({ content: t('common:repeatSignName'), duration: 1 });
       return false;
     }
     const idx = this.signAll.findIndex((k) => k.id === signItem.id);
@@ -940,7 +930,7 @@ class Wave extends Component<TProps, TState> {
       this.setState({ manualSigns });
     }
     this.drawSign();
-    message.success({ content: i18next.t('common:editSignSucc'), duration: 1 });
+    message.success({ content: t('common:editSignSucc'), duration: 1 });
     return true;
   };
 
@@ -958,7 +948,7 @@ class Wave extends Component<TProps, TState> {
   onAddSign = () => {
     const { onClickAddSign = noop } = this.props;
     if ((!this.selectStartMs && !this.selectEndMs) || this.selectEndMs === this.selectStartMs) {
-      message.error(i18next.t('common:signPla'));
+      message.error(t('common:signPla'));
       return;
     }
     onClickAddSign();
@@ -974,7 +964,8 @@ class Wave extends Component<TProps, TState> {
   onSliderDown = (e) => {
     const { scanSliderRef } = this.domRefs;
     if (!scanSliderRef.current) return;
-    this.scanStartX = e.clientX;
+    const rect = e.target.getBoundingClientRect();
+    this.scanStartX = e.clientX - rect.left;
     scanSliderRef.current.style.cursor = '-webkit-grab';
     window.addEventListener('mouseup', this.onSliderUp);
     window.addEventListener('mousemove', this.onSliderMove);
@@ -983,22 +974,43 @@ class Wave extends Component<TProps, TState> {
   onSliderMove = (e) => {
     const { scanSliderRef } = this.domRefs;
     if (!scanSliderRef.current) return;
+    const scanRect = scanSliderRef.current.getBoundingClientRect();
+    let posX = 0;
+    if (e.target) {
+      const rect = e.target.getBoundingClientRect();
+      posX = e.clientX - rect.left;
+    } else {
+      posX = e;
+    }
+    // 鼠标移除左侧区域
+    if (e.clientX < scanRect.left) return;
     scanSliderRef.current.style.cursor = '-webkit-grab';
-    const posX = e.clientX;
-    const currentScanX = this.prevScanStartX + posX - this.scanStartX;
+
+    let currentScanX = this.prevScanStartX + posX - this.scanStartX;
     const mainHasMovedX = this.getMainHasMovedX(currentScanX);
-    const startMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, mainHasMovedX, this.state.zoom);
+    let startMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, mainHasMovedX, this.state.zoom);
     const totalMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, mainHasMovedX + this.mainWaveWidth, this.state.zoom);
     this.drawMultiSelectArea();
     this.drawSelectArea(this.selectStartMs, this.selectEndMs, true, false);
-    if (totalMs > this.totalMs || currentScanX < 0) {
-      return;
+    if (currentScanX < 10) {
+      currentScanX = 0;
+      startMs = 0;
+    }
+
+    if (totalMs > this.totalMs - 10) {
+      const zoonWidth = this.mainWaveWidth / (this.state.zoom / 100);
+      currentScanX = this.mainWaveWidth - zoonWidth;
+      const mainHasMovedX = this.getMainHasMovedX(currentScanX);
+      startMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, mainHasMovedX, this.state.zoom);
     }
 
     this.drawSign();
     this.drawXAxis(startMs);
     this.updateMainWave(startMs);
     this.drawScanSlider(currentScanX, false);
+    if (!e.target) {
+      this.prevScanStartX = this.currentScanStartX;
+    }
   };
 
   /** 下一次重绘更新图谱 */
@@ -1062,9 +1074,9 @@ class Wave extends Component<TProps, TState> {
 
   reDraw = () => {
     this.getWaveHead();
-    this.drawMainWave();
+    this.drawMainWave(this.xAxisStartMs);
     this.drawWaveScan();
-    this.drawXAxis(0);
+    this.drawXAxis(this.xAxisStartMs);
   };
 
   waveSaveTmp = () => {
@@ -1072,30 +1084,38 @@ class Wave extends Component<TProps, TState> {
     waveGraph.saveEdit(this.waveId, tempFilePath, (res) => {
       if (res) {
         this.audio.src = `file:\\\\\\${tempFilePath}`;
-        this.audio.playbackRate = this.state.playbackRates.value;
+        this.audio.playbackRate = this.state.playbackRate.value;
       }
     });
   };
 
   waveAction = utils.debounce((receiveParams) => {
-    const { type, name, id } = receiveParams;
+    const { type, name, activeFileId } = receiveParams;
     const { Global, fileId } = this.props;
     const { copyByteSizeLimit } = waveConfig;
     const positon = this.selectStartMs;
     const size = this.selectEndMs - this.selectStartMs;
     const selectByteSize = (size / this.totalMs) * this.pcmSize;
     if (selectByteSize > copyByteSizeLimit) {
-      message.warning(i18next.t('common:editAreaLimit'));
+      message.warning(t('common:editAreaLimit'));
       return;
     }
     switch (type) {
-      case 'select_all': {
+      case 'wave_all': {
         this.selectStartMs = 0;
         this.selectEndMs = this.totalMs;
         this.drawSelectArea(0, this.totalMs, true, true);
+        Global.setRegion({ begin_time: 0, end_time: this.totalMs });
         break;
       }
-      case 'space': {
+      // case 'wave_all_no': {
+      //   this.selectStartMs = 0;
+      //   this.selectEndMs = 0;
+      //   this.drawSelectArea(0, 0, true);
+      //   Global.setRegion({ begin_time: 0, end_time: 0 });
+      //   break;
+      // }
+      case 'wave_space': {
         const { playCurrentTime, playing } = this.state;
         if (playing) {
           this.pause(playCurrentTime);
@@ -1105,7 +1125,7 @@ class Wave extends Component<TProps, TState> {
         }
         break;
       }
-      case 'cut': {
+      case 'wave_cut': {
         if (!size) return;
         const cutData: Buffer | Uint8Array = waveGraph.getData(this.waveId, this.selectStartMs, this.selectEndMs);
         Global.setCacheWaveData({ orignFileId: fileId, orignWaveId: this.waveId, originBufMs: size, orignCutBuf: cutData });
@@ -1117,44 +1137,42 @@ class Wave extends Component<TProps, TState> {
             this.reDraw();
             this.updateWave();
             this.onDeleteAreas(this.selectStartMs, this.selectEndMs);
+            // 取消选中区间
+            this.selectEndMs = this.selectStartMs;
+            this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
         });
         break;
       }
-      case 'copy': {
+      case 'wave_copy': {
         if (!size) return;
         const copyData: Buffer | Uint8Array = waveGraph.getData(this.waveId, this.selectStartMs, this.selectEndMs);
         Global.setCacheWaveData({ orignFileId: fileId, orignWaveId: this.waveId, originBufMs: size, orignCutBuf: copyData });
-        message.success(i18next.t('common:copySucc'));
+        message.success(t('common:copySucc'));
         break;
       }
-      case 'paste': {
-        if (!Global.waveCacheData.originBufMs) return;
-        const waveInsertParams: WaveEditParam = {
-          type: 'insert',
-          positon,
-          size: toJS(Global.waveCacheData.originBufMs),
-          data: toJS(Global.waveCacheData.orignCutBuf)
-        };
+      case 'wave_paste': {
+        const copyBuf = toJS(Global.waveCacheData.orignCutBuf);
+        const copyBufMs = toJS(Global.waveCacheData.originBufMs);
+        if (!copyBufMs) return;
+        const waveInsertParams: WaveEditParam = { type: 'insert', positon, size: copyBufMs, data: copyBuf };
         waveGraph.editWave(this.waveId, waveInsertParams, (res: WaveEditResult) => {
           if (res.ok) {
-            // this.drawTotalMs = this.drawTotalMs + Global.waveCacheData.originBufMs;
             this.reDraw();
-            this.drawXAxis(0);
             this.setState({ hasEdit: true });
             this.updateWave();
+            this.onAddAreas(positon, copyBufMs);
+            this.drawSelectArea(positon, positon + copyBufMs, true);
             Global.setCacheWaveData({});
-            this.onAddAreas(positon, size + positon);
           }
         });
         break;
       }
-      case 'clear': {
+      case 'wave_clear': {
         if (!size) return;
         const waveClearParams: WaveEditParam = { type: 'clear', positon, size };
         waveGraph.editWave(this.waveId, waveClearParams, (res: WaveEditResult) => {
           if (res.ok) {
-            // this.drawTotalMs = this.drawTotalMs - size;
             this.reDraw();
             this.setState({ hasEdit: true });
             this.updateWave();
@@ -1163,29 +1181,29 @@ class Wave extends Component<TProps, TState> {
         });
         break;
       }
-      case 'delete': {
+      case 'wave_delete': {
         if (!size) return;
         const waveDeleteParams: WaveEditParam = { type: 'delete', positon, size };
         waveGraph.editWave(this.waveId, waveDeleteParams, (res: WaveEditResult) => {
           if (res.ok) {
-            // this.drawTotalMs = this.drawTotalMs - size;
             this.reDraw();
             this.setState({ hasEdit: true });
             this.updateWave();
             Global.setCacheWaveData({});
             this.onDeleteAreas(this.selectStartMs, this.selectEndMs);
+            this.selectEndMs = this.selectStartMs;
+            this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
         });
         break;
       }
-      case 'save': {
+      case 'wave_save': {
         if (!this.state.hasEdit) {
-          message.warning(i18next.t('common:noNeedSave'));
+          message.warning(t('common:noNeedSave'));
           return;
         }
         const tempFilePath = path.join(Reflect.get($$, 'tempFiles'), `${Date.now()}.wav`);
         this.setState({ mainLoading: true });
-
         waveGraph.saveEdit(this.waveId, tempFilePath, (res) => {
           if (res) {
             PubSub.publish(AppEventNames.REFRESH_UPLOAD_LIST, { filePaths: [tempFilePath] });
@@ -1194,11 +1212,10 @@ class Wave extends Component<TProps, TState> {
         });
         break;
       }
-      case 'undo': {
+      case 'wave_undo': {
         if (this.waveId < 0 || this.operationRecord.length === 0) return;
         waveGraph.undoEdit(this.waveId, (res: WaveUndoResult) => {
           if (res.ok) {
-            // this.drawTotalMs = res.index > 0 ? this.drawTotalMs + res.size : this.totalMs;
             this.setState({ hasEdit: res.index > 0 });
             this.reDraw();
             this.updateWave();
@@ -1228,44 +1245,35 @@ class Wave extends Component<TProps, TState> {
         });
         break;
       }
-      case 'setAllSelection': {
-        this.selectStartMs = 0;
-        this.selectEndMs = this.totalMs;
-        this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
-        Global.setTotalMs(this.totalMs);
-        Global.setRegion({
-          begin_time: 0,
-          end_time: this.totalMs
-        });
+      case 'wave_right': {
+        this.scanStartX = 0;
+        this.onSliderMove(10);
         break;
       }
-      case 'cancelAllSelection': {
-        this.selectStartMs = 0;
-        this.selectEndMs = 0;
-        this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
-        Global.setRegion({
-          begin_time: 0,
-          end_time: 0
-        });
+      case 'wave_left': {
+        this.scanStartX = 0;
+        this.onSliderMove(-10);
         break;
       }
-      case 'addSign': {
+
+      case 'wave_addSign': {
         const addSignParams = { startTime: this.selectStartMs, isManual: true, endTime: this.selectEndMs, name };
         this.addSign(addSignParams);
         break;
       }
-      case 'editSign': {
+      case 'wave_editSign': {
         this.editSign(receiveParams);
         break;
       }
       case 'deleteSign': {
-        this.deleteSign(id);
+        this.deleteSign(activeFileId);
         break;
       }
+
       default:
         break;
     }
-  });
+  }, 30);
 
   /** 更新音频buffer */
   updateWave = () => {
@@ -1348,7 +1356,8 @@ class Wave extends Component<TProps, TState> {
       manualSignListVisible,
       mainLoading,
       scanLoading,
-      isValidFile
+      isValidFile,
+      zoomRatio
     } = this.state;
     const {
       onDoubleClickSign,
@@ -1357,8 +1366,7 @@ class Wave extends Component<TProps, TState> {
       showManualSign = true,
       showSelectArea = true,
       smartSignTitle,
-      isSearchVoiceSign,
-      playbackRates
+      isSearchVoiceSign
     } = this.props;
     return isValidFile ? (
       <div
@@ -1367,7 +1375,7 @@ class Wave extends Component<TProps, TState> {
           Mousetrap.unbind('space');
           Mousetrap.bind('space', (e: KeyboardEvent) => {
             e.preventDefault();
-            this.waveAction({ type: 'space' });
+            this.waveAction({ type: 'wave_space' });
           });
         }}
       >
@@ -1379,25 +1387,12 @@ class Wave extends Component<TProps, TState> {
             <div className="flex-1 ui-ov-h">
               <div className="wave-head">
                 <canvas ref={scanWaveRef} className="wave-head-scan"></canvas>
-                <canvas
-                  ref={scanSliderRef}
-                  onMouseLeave={(e) => this.onBgUp(e, false)}
-                  onMouseDown={this.onSliderDown}
-                  onMouseUp={this.onBgUp}
-                  className="wave-scan-slider"
-                ></canvas>
+                <canvas ref={scanSliderRef} onMouseDown={this.onSliderDown} className="wave-scan-slider"></canvas>
               </div>
 
               <div className="wave-content" ref={clientRef}>
                 <div>
-                  <canvas
-                    className="wave-content-bg"
-                    ref={bgWaveRef}
-                    onMouseLeave={(e) => this.onBgUp(e, false)}
-                    onMouseDown={this.onBgDown}
-                    onMouseUp={this.onBgUp}
-                    onWheel={this.onWheel}
-                  />
+                  <canvas className="wave-content-bg" ref={bgWaveRef} onWheel={this.onWheel} onMouseDown={this.onBgDown} />
                   <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}>
                     <canvas className="wave-content-fore" ref={mainWaveRef} style={{ cursor: 'text' }} />
                   </Spin>
@@ -1412,31 +1407,36 @@ class Wave extends Component<TProps, TState> {
             {showSmartSign ? (
               <div style={{ position: 'relative', height: showSmartSign ? '32px' : 0 }}>
                 <canvas
-                  onDoubleClick={(e) => this.signDoubleClick(e, false)}
-                  onClick={(e) => this.signClick(e, false)}
-                  className="sign-area-bg"
                   ref={smartSignRef}
+                  className="sign-area-bg"
                   style={{ cursor: 'text' }}
-                  title={i18next.t('common:lookMore')}
+                  title={t('common:lookMore')}
+                  onClick={(e) => this.signClick(e, false)}
+                  onDoubleClick={(e) => this.signDoubleClick(e, false)}
                 />
                 <div className="sign-img-contain">
                   {smartSignTitle ? (
                     <span>{smartSignTitle}</span>
                   ) : (
                     <>
-                      {i18next.t('common:autoSign')}
-                      <img src={atlas_label} className="smart_img" title={i18next.t('common:autoSign')} alt={i18next.t('common:autoSign')} />
+                      {t('common:autoSign')}
+                      <img src={atlas_label} className="smart_img" title={t('common:autoSign')} alt={t('common:autoSign')} />
                     </>
                   )}
                 </div>
                 <Popover
+                  trigger="click"
                   placement="left"
+                  overlayClassName="sign_modal"
+                  visible={smartSignListVisible}
+                  getPopupContainer={() => document.querySelector('.wave-bottom') as HTMLElement}
+                  onVisibleChange={(visible) => this.setState({ smartSignListVisible: visible })}
                   title={
                     <div className="flex just-between">
-                      <div>{`${i18next.t('common:sign')}（${this.signAll?.length}）`}</div>
+                      <div>{`${t('common:sign')}（${this.signAll?.length}）`}</div>
                       <div
                         className="cursor fz20"
-                        title={i18next.t('common:close')}
+                        title={t('common:close')}
                         style={{ lineHeight: '14px' }}
                         onClick={() => this.setState({ smartSignListVisible: false })}
                       >
@@ -1445,15 +1445,12 @@ class Wave extends Component<TProps, TState> {
                     </div>
                   }
                   content={() => <SignTable isSearchVoiceSign={isSearchVoiceSign} dataSource={this.signAll.filter((item) => !item.isManual)} />}
-                  trigger="click"
-                  visible={smartSignListVisible}
-                  overlayClassName="sign_modal"
                 >
                   <img
                     src={smartSignListVisible ? more_signclose : more_signopen}
                     className="sign_collapsed"
-                    title={smartSignListVisible ? i18next.t('common:hideSignList') : i18next.t('common:showSignList')}
-                    alt={i18next.t('common:sign')}
+                    title={smartSignListVisible ? t('common:hideSignList') : t('common:showSignList')}
+                    alt={t('common:sign')}
                     onClick={() => {
                       this.setState({ manualSignListVisible: false });
                       this.setState({ smartSignListVisible: !smartSignListVisible });
@@ -1463,8 +1460,8 @@ class Wave extends Component<TProps, TState> {
                 <img
                   src={smartSignVisible ? atlas_eyesopen : atlas_eyesclose}
                   className="visible_img"
-                  title={smartSignVisible ? i18next.t('common:showAutoSign') : i18next.t('common:hideAutoSign')}
-                  alt={i18next.t('common:hide')}
+                  title={smartSignVisible ? t('common:showAutoSign') : t('common:hideAutoSign')}
+                  alt={t('common:hide')}
                   onClick={this.toggleSmartSign}
                 />
                 <div className="border" />
@@ -1477,19 +1474,24 @@ class Wave extends Component<TProps, TState> {
               <img
                 src={signVisible ? atlas_eyesopen : atlas_eyesclose}
                 className="visible_img"
-                title={signVisible ? i18next.t('common:show') : i18next.t('common:hide')}
-                alt={i18next.t('common:hide')}
+                title={signVisible ? t('common:show') : t('common:hide')}
+                alt={t('common:hide')}
                 onClick={this.toggleSign}
               />
               <Popover
-                style={{ zIndex: 2 }}
+                trigger="click"
                 placement="left"
+                style={{ zIndex: 2 }}
+                overlayClassName="sign_modal"
+                visible={manualSignListVisible}
+                onVisibleChange={(visible) => this.setState({ manualSignListVisible: this.props.Global?.showSignEdit || visible })}
+                getPopupContainer={(node) => document.querySelector('.wave-bottom') as HTMLElement}
                 title={
                   <div className="flex just-between">
-                    <div>{`${i18next.t('common:sign')}（${manualSigns?.length}）`}</div>
+                    <div>{`${t('common:sign')}（${manualSigns?.length}）`}</div>
                     <div
                       className="cursor fz20"
-                      title={i18next.t('common:close')}
+                      title={t('common:close')}
                       style={{ lineHeight: '14px' }}
                       onClick={() => this.setState({ manualSignListVisible: false })}
                     >
@@ -1498,14 +1500,11 @@ class Wave extends Component<TProps, TState> {
                   </div>
                 }
                 content={() => <SignTable dataSource={[...manualSigns]} onEditSign={onDoubleClickSign} />}
-                trigger="click"
-                visible={manualSignListVisible}
-                overlayClassName="sign_modal"
               >
                 <img
                   src={manualSignListVisible ? more_signclose : more_signopen}
                   className="sign_collapsed"
-                  title={manualSignListVisible ? i18next.t('common:hideSignList') : i18next.t('common:showSignList')}
+                  title={manualSignListVisible ? t('common:hideSignList') : t('common:showSignList')}
                   alt="标记"
                   onClick={() => {
                     this.setState({ smartSignListVisible: false });
@@ -1523,44 +1522,31 @@ class Wave extends Component<TProps, TState> {
               {/* {waveUtil.secondsToMinutes(playCurrentTime)} */}
               {showSelectArea ? (
                 <span className="mr20">
-                  {i18next.t('common:selectArea')}&nbsp;
+                  {t('common:selectArea')}&nbsp;
                   {utils.toHHmmss(this.selectStartMs)}-{utils.toHHmmss(this.selectEndMs)}
                 </span>
               ) : null}
               <span>
-                {i18next.t('common:time')}&nbsp;
+                {t('common:time')}&nbsp;
                 {utils.toHHmmss(this.totalMs)}
               </span>
             </span>
             <div className="play-action word-nowrap">
               {playing ? (
-                <img
-                  src={atlas_stop}
-                  className="operate_img"
-                  title={i18next.t('common:pause')}
-                  alt={i18next.t('common:pause')}
-                  onClick={() => this.pause(playCurrentTime)}
-                />
+                <img src={atlas_stop} className="operate_img" title={t('common:pause')} alt={t('common:pause')} onClick={() => this.pause(playCurrentTime)} />
               ) : (
-                <img src={atlas_play} className="operate_img" title={i18next.t('common:play')} alt={i18next.t('common:play')} onClick={() => this.play()} />
+                <img src={atlas_play} className="operate_img" title={t('common:play')} alt={t('common:play')} onClick={() => this.play()} />
               )}
               {showAddBtn ? (
-                <img
-                  src={atlas_sign}
-                  className="operate_img ui-ml-10"
-                  title={i18next.t('common:addSign')}
-                  alt={i18next.t('common:addSign')}
-                  onClick={this.onAddSign}
-                />
+                <img src={atlas_sign} className="operate_img ui-ml-10" title={t('common:addSign')} alt={t('common:addSign')} onClick={this.onAddSign} />
               ) : null}
               <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-block' }}>
                 <Popover
                   trigger="focus"
                   visible={this.state.playbackRateVisible}
                   overlayClassName="playbackRates"
-                  onVisibleChange={() => {
-                    this.setState({ playbackRateVisible: true });
-                  }}
+                  getPopupContainer={(node) => node.parentNode as HTMLElement}
+                  onVisibleChange={(visible) => this.setState({ playbackRateVisible: visible })}
                   content={
                     <div>
                       {waveConfig.playbackRates.map((item) => {
@@ -1569,14 +1555,14 @@ class Wave extends Component<TProps, TState> {
                             className="play_back_rate"
                             key={item.label}
                             onClick={(e) => {
-                              e.stopPropagation();
                               e.preventDefault();
-                              this.setState({ playbackRates: item, playbackRateVisible: false });
+                              e.stopPropagation();
                               this.audio.playbackRate = item.value;
+                              this.setState({ playbackRate: item, playbackRateVisible: false });
                               return;
                             }}
                           >
-                            <span className="content">{item.value === 1 ? `${item.label}${i18next.t('common:playbackRatesNormal')}` : item.label}</span>
+                            <span className="content">{item.value === 1 ? `${item.label}${t('common:playbackRatesNormal')}` : item.label}</span>
                           </div>
                         );
                       })}
@@ -1584,34 +1570,22 @@ class Wave extends Component<TProps, TState> {
                   }
                 >
                   <Button size="small" className="play_backRate_btn">
-                    {this.state.playbackRates.label}
+                    {this.state.playbackRate.label}
                   </Button>
                 </Popover>
               </div>
             </div>
             <div className="zoom-area">
-              <img
-                src={atlas_big}
-                className="operate_img"
-                title={i18next.t('common:zoomIn')}
-                alt={i18next.t('common:zoomIn')}
-                onClick={() => this.zoomChange('zoomIn')}
-              />
+              <img src={atlas_big} className="operate_img" title={t('common:zoomIn')} alt={t('common:zoomIn')} onClick={() => this.zoomChange('zoomIn')} />
               <img
                 src={atlas_sma}
                 className="operate_img ui-ml-10"
-                title={i18next.t('common:zoomOut')}
-                alt={i18next.t('common:zoomOut')}
+                title={t('common:zoomOut')}
+                alt={t('common:zoomOut')}
                 onClick={() => this.zoomChange('zoomOut')}
               />
-              <Select
-                defaultValue={playbackRates[2].value}
-                style={{ width: 70 }}
-                // onChange={(value) => (this.audio.playbackRate = value)}
-                className="scale-select"
-                size="small"
-              >
-                {playbackRates.map((item) => (
+              <Select value={zoomRatio} onChange={this.onZoomRatioChange} className="scale-select" size="small" style={{ width: 80 }}>
+                {waveConfig.zoomRatios.map((item) => (
                   <Select.Option value={item.value} key={item.value}>
                     {item.label}
                   </Select.Option>
@@ -1646,8 +1620,6 @@ class Wave extends Component<TProps, TState> {
               top: 0;
               left: 0;
               z-index: 2;
-              opacity: 0.45;
-              border: 1px solid #009ee9;
             }
             .wave-head-scan {
               position: absolute;

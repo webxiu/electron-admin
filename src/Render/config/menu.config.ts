@@ -34,5 +34,12 @@ export const menuList: MenuItemTypes[] = [
     path: '/home/media',
     icon: require('@/Render/assets/img/menu/menu_setting.png').default,
     icon_on: require('@/Render/assets/img/menu/menu_setting_on.png').default
+  },
+  {
+    key: 'ffmpeg',
+    title: '媒体',
+    path: '/home/ffmpeg',
+    icon: require('@/Render/assets/img/menu/menu_setting.png').default,
+    icon_on: require('@/Render/assets/img/menu/menu_setting_on.png').default
   }
 ];

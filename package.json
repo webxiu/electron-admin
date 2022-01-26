@@ -40,8 +40,7 @@
     "mobx-react-router": "~4.1.0",
     "mousetrap": "^1.6.5",
     "nedb": "~1.8.0",
-    "pubsub-js": "^1.9.3",
-    "rc-cascader": "^2.3.2",
+    "pubsub-js": "^1.9.3", 
     "react": "~17.0.0",
     "react-dom": "~17.0.0",
     "react-router": "~5.2.0",
@@ -134,6 +133,7 @@
     "webpackbar": "~4.0.0",
     "yamljs": "^0.3.0"
   },
+  "author": "Hailen",
   "build": {
     "publish": [
       {

@@ -20,6 +20,14 @@ export default {
     lineColor: '#51A1EB',
     backgroundColor: 'rgba(179,215,246, .3)'
   },
+  /** 滑块 */
+  scanMask: {
+    lineWidth: 2,
+    borderColor: 'rgba(21, 136, 204, 0.8)',
+    backgroundColor: 'rgba(220,190,200,0.5)'
+  },
+  /** 滑块区域的选中颜色 */
+  selectSliderColor: 'rgba(0, 56, 197, 0.5)',
   /** 手动标记区域 */
   signConfig: {
     height: 30,
@@ -31,10 +39,6 @@ export default {
     height: 30,
     color: '#51A1EB',
     backgroundColor: 'rgba(179,215,246, .3)'
-  },
-  scanMask: {
-    borderColor: '#e09b11',
-    backgroundColor: 'rgba(220,220,220,1)'
   },
   zoomStep: 60,
   waveScanHeight: 28,
@@ -53,6 +57,14 @@ export default {
     wavecolor: [0, 238, 152] // 图谱颜色
   },
   copyByteSizeLimit: 1024 * 1024 * 1024 * 2, // 复制的字节大小限制2G
+  zoomRatios: [
+    { label: '100%', value: 100 },
+    { label: '120%', value: 120 },
+    { label: '240%', value: 240 },
+    { label: '480%', value: 480 },
+    { label: '1000%', value: 1000 },
+    { label: '2000%', value: 2000 }
+  ],
   playbackRates: [
     { label: '2.0x', value: 2 },
     { label: '1.5x', value: 1.5 },

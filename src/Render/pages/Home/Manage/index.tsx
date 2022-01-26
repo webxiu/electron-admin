@@ -33,6 +33,8 @@ const Wrap: React.FC = () => {
       <p>Value: {text}</p>
       <p>Debounced value: {value}</p>
       <Button>风口浪尖</Button>
+      <hr />
+
       <style jsx global>{``}</style>
     </div>
   );
