@@ -1,5 +1,6 @@
 import { Button, Popover, Select, Spin, message } from 'antd';
 import React, { Component, createRef } from 'react';
+import { execFfmpeg, sampleObj, saveFfmpeg } from './ffmpeg';
 import { inject, observer } from 'mobx-react';
 import waveGraph, { WaveEditParam, WaveEditResult, WaveUndoResult } from '@/Render/package/Wave-Graph-X64';
 
@@ -20,6 +21,7 @@ import fs from 'fs';
 import more_signclose from '@/Render/assets/img/wave/more_signclose.png';
 import more_signopen from '@/Render/assets/img/wave/more_signopen.png';
 import path from 'path';
+import { readFile } from '@/Render/utils/fs';
 import { t } from 'i18next';
 import { toJS } from 'mobx';
 import utils from '@/Render/utils';
@@ -505,6 +507,23 @@ class Wave extends Component<TProps, TState> {
           // 将uint8Array类型的buff转化为Uint8ClampedArray
           const uint8ClapedBuf = new Uint8ClampedArray(Array.from(buff));
           const imageData = new ImageData(uint8ClapedBuf, this.mainWaveWidth, this.mainWaveHeight);
+          /** ======= 设置颜色 start ====== */
+          const [br, bg, bb] = backgroudcolor;
+          const [cr, cg, cb] = wavecolor;
+          const data = imageData.data;
+          for (var i = 0; i < data.length; i += 4) {
+            if (data[i] === 49 && data[i + 1] === 49 && data[i + 2] === 49) {
+              data[i] = cr;
+              data[i + 1] = cg;
+              data[i + 2] = cb;
+            } else {
+              data[i] = br;
+              data[i + 1] = bg;
+              data[i + 2] = bb;
+            }
+          }
+          imageData.data.set(data, 0);
+          /** ======= 设置颜色 end ====== */
           createImageBitmap(imageData).then((r) => {
             this.mainCtx.drawImage(r, 0, 0, this.mainWaveWidth, this.mainWaveHeight, 0, 8, this.mainWaveWidth, this.mainWaveHeight);
             if (this.isFirstUplod) {
@@ -791,7 +810,6 @@ class Wave extends Component<TProps, TState> {
       startMS = this.totalMs - waveWidthMs;
     }
     return startMS;
-    // return a < 0 && (a = 0), a + waveTotalMs > this.totalMs && (a = this.totalMs - waveTotalMs), a;
   }
 
   zoomChange = utils.throttle((type: 'zoomIn' | 'zoomOut', nowZoom?: number) => {
@@ -800,8 +818,7 @@ class Wave extends Component<TProps, TState> {
     const { zoom } = this.state;
     const changeZoom = type === 'zoomIn' ? waveConfig.zoomStep : -waveConfig.zoomStep;
     nowZoom = nowZoom ? nowZoom : zoom + changeZoom;
-    if (nowZoom < 100) nowZoom = 100;
-
+    if (nowZoom < 100) return;
     this.setState({ zoomRatio: `${nowZoom}%` });
     onZoomChange && onZoomChange(nowZoom);
 
@@ -1344,6 +1361,36 @@ class Wave extends Component<TProps, TState> {
     return dataSource;
   }
 
+  /** 音频操作 */
+  voiceHandler() {
+    const inputPath = this.filePath;
+    const outPath = path.join(process.cwd(), '/public/assets/video/16_long_bak.wav');
+    const sampleRate = 16000;
+    const sOut = sampleObj[sampleRate];
+    const startTime = utils.toHHmmss(this.selectStartMs).split('.')[0];
+    const endTime = utils.toHHmmss(this.selectEndMs).split('.')[0];
+
+    // const spawnCmd: any = ['-f', `${sOut}`, '-ar', `${sampleRate}`, '-ac', '1', '-y', '-i', inputPath, outPath];
+    const spawnCmd: any = ['-f', `${sOut}`, '-ar', `${sampleRate}`, '-ac', '1', '-y', '-ss', startTime, '-t', endTime, '-i', inputPath, outPath];
+    console.log('spawnCmd', spawnCmd);
+
+    execFfmpeg(spawnCmd)
+      .then((res) => {
+        console.log('res', res);
+      })
+      .catch((err) => console.log('err', err));
+  }
+
+  /** 获取文件流存本地 */
+  // getFilePath() {
+  //   // const int8 = new Uint8Array(res, 2);
+  //   const filePath = path.join(process.cwd(), '/public/assets/video/16k.wav');
+  //   const int8 = readFile(filePath);
+  //   if (!int8) return;
+  //   const { inputPath, outPath } = saveFfmpeg({ name: 'test.wav', int8, sampleRate: 1600, channels: 1 });
+  //   console.log(' inputPath, outPath', inputPath, outPath);
+  // }
+
   render() {
     const { scanWaveRef, bgWaveRef, mainWaveRef, clientRef, xAxisRef, yAxisRef, scanSliderRef, signRef, smartSignRef } = this.domRefs;
     const {
@@ -1379,6 +1426,9 @@ class Wave extends Component<TProps, TState> {
           });
         }}
       >
+        <Button onClick={this.voiceHandler.bind(this)} type="primary" style={{ width: 50 }}>
+          保存
+        </Button>
         <div className="wave-graph">
           <div className="flex">
             <div className="ui-h-100" style={{ width: this.yAxisWidth }}>
@@ -1584,7 +1634,7 @@ class Wave extends Component<TProps, TState> {
                 alt={t('common:zoomOut')}
                 onClick={() => this.zoomChange('zoomOut')}
               />
-              <Select value={zoomRatio} onChange={this.onZoomRatioChange} className="scale-select" size="small" style={{ width: 80 }}>
+              <Select value={zoomRatio} onChange={this.onZoomRatioChange.bind(this)} className="scale-select" size="small" style={{ width: 80 }}>
                 {waveConfig.zoomRatios.map((item) => (
                   <Select.Option value={item.value} key={item.value}>
                     {item.label}

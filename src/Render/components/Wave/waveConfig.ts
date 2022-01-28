@@ -53,8 +53,10 @@ export default {
       g: Array.from({ length: 256 }, (item, i) => i),
       b: Array.from({ length: 256 }, (item, i) => i)
     },
-    backgroudcolor: [0, 0, 0], // 图谱背景色
-    wavecolor: [0, 238, 152] // 图谱颜色
+    // 图谱背景色
+    backgroudcolor: [255, 255, 255],
+    // 图谱颜色
+    wavecolor: [0, 0, 0]
   },
   copyByteSizeLimit: 1024 * 1024 * 1024 * 2, // 复制的字节大小限制2G
   zoomRatios: [

@@ -11,9 +11,9 @@ import { useHistory } from 'react-router';
 import utils from '@/Render/utils/index';
 import { waveOptions } from '@/Render/config/wave.config';
 
-let dirName = path.join(__dirname, '../../../../../../public/assets/video/32k.wav');
+let dirName = path.join(process.cwd(), '/public/assets/video/32k.wav');
 if (dirName.includes('app.asar') || dirName.includes('app')) {
-  dirName = path.join(__dirname, '../../', '../../../../../../public/assets/video/32k.wav');
+  dirName = path.join(process.cwd(), '/public/assets/video/32k.wav');
 }
 
 console.log(`dirName`, dirName);
