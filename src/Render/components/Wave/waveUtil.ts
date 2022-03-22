@@ -15,19 +15,19 @@ export default {
     const ghostPx = totalPx * (zoom / 100);
     const ghostPerPxMeanMs = totalMs / ghostPx;
     const actualPx = nowMs / ghostPerPxMeanMs;
-    return Math.floor(actualPx);
+    return actualPx;
   },
   pxToMs(totalMs: number, totalPx: number, nowPx: number, zoom: number) {
     const ghostPx = totalPx * (zoom / 100);
     const ghostPerPxMeanMs = totalMs / ghostPx;
     const actualMs = nowPx * ghostPerPxMeanMs;
-    return Math.floor(actualMs);
+    return actualMs;
   },
   getNowHeight(v) {
-    return Math.floor((v / 100) * 100);
+    return (v / 100) * 100;
   },
   secondsToMinutes(ms) {
-    const seconds = Math.floor(ms / 1000);
+    const seconds = ms / 1000;
     let timeArr: number[] = [];
     const hours = seconds / 60 / 60,
       minutes = (seconds / 60) % 60,

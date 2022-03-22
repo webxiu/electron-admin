@@ -30,7 +30,7 @@ module.exports = {
   smp: false,
 
   /** 主进程端口，开发环境渲染进程端口号 +=1 */
-  port: 10701,
+  port: 10120,
 
   entry: {
     renderProcess: 'src/Render/index.tsx',
@@ -52,8 +52,8 @@ module.exports = {
   publicPath: '/',
 
   devServer: {
-    after() {},
-    before() {}
+    after() { },
+    before() { }
   },
   prefix: '/apis',
   hotUpdaterUri: 'http://118.24.173.102:10160',

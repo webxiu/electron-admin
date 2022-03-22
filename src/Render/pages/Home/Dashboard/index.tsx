@@ -122,7 +122,6 @@ const Wrap: React.FC = () => {
           // setMark({ showMore: true, title: t('ViewMore') });
           // markRef.current?.open({ content: item.name, marks: 2 });
         }}
-        onZoomChange={(zoom) => {}}
       />
     </div>
   );

@@ -108,8 +108,6 @@ type TProps = {
   smartSignTitle?: string;
   /** 是否为以音搜音图谱(用于标注折叠表格配置) */
   isSearchVoiceSign?: boolean;
-  /** 是否为以音搜音图谱(用于标注折叠表格配置) */
-  onZoomChange?: (zoom: number) => void;
   /** 不同标记颜色 */
   signsColors?: string[];
 };
@@ -492,13 +490,14 @@ class Wave extends Component<TProps, TState> {
         height: this.mainWaveHeight,
         columnIndex: startPx,
         columnCount: this.mainWaveWidth,
+        columnMs: startMs,
         width: this.mainWaveWidth,
         Ystart,
         xMap,
         yMap,
-        rgb,
-        backgroudcolor,
-        wavecolor
+        rgb
+        // backgroudcolor,
+        // wavecolor
       };
       // this.setState({ mainLoading: true });
       waveGraph.getGraphCanvasData({
@@ -511,7 +510,7 @@ class Wave extends Component<TProps, TState> {
           const [br, bg, bb] = backgroudcolor;
           const [cr, cg, cb] = wavecolor;
           const data = imageData.data;
-          for (var i = 0; i < data.length; i += 4) {
+          for (let i = 0; i < data.length; i += 4) {
             if (data[i] === 49 && data[i + 1] === 49 && data[i + 2] === 49) {
               data[i] = cr;
               data[i + 1] = cg;
@@ -544,7 +543,7 @@ class Wave extends Component<TProps, TState> {
     const { gridFillColor, font, fillStyle, xAxisHeight, tickHeight, labelColor, tickCount } = waveConfig.xAxisConfig;
     // 根据tickCount（20）计算每个刻度显示的时间, 4k笔记本刻度: 11
     const smallTickCount = window.innerWidth <= 1600 ? 11 : tickCount;
-    const xAxisMinMs = Math.floor(this.drawTotalMs / smallTickCount / (zoom / 100));
+    const xAxisMinMs = this.drawTotalMs / smallTickCount / (zoom / 100);
     this.xAxisCtx.font = font;
     this.xAxisCtx.fillStyle = fillStyle;
     this.xAxisCtx.fillRect(0, 0, this.mainWaveWidth, xAxisHeight);
@@ -673,7 +672,8 @@ class Wave extends Component<TProps, TState> {
   /** 绘制选中区域 */
   drawSelectArea = (startTime: number, endTime: number, isManual: boolean, clearnBg = true, signCate?: number) => {
     const { signsColors } = this.props;
-    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
+    const startScanX = (this.xAxisStartMs / this.totalMs) * this.mainWaveWidth;
+    const mainHasMovedMs = this.getMainHasMovedX(startScanX) * this.actualPerPxMeamMs;
     startTime = startTime - mainHasMovedMs;
     endTime = endTime - mainHasMovedMs;
     const { lineWidth } = waveConfig.playLineConfig;
@@ -692,7 +692,6 @@ class Wave extends Component<TProps, TState> {
     }
     this.bgCtx.fillRect(startX, 0, endX - startX, this.mainWaveHeight);
 
-    const startScanX = (this.xAxisStartMs / this.totalMs) * this.mainWaveWidth;
     isManual && this.drawScanSlider(startScanX, false);
   };
 
@@ -814,15 +813,13 @@ class Wave extends Component<TProps, TState> {
 
   zoomChange = utils.throttle((type: 'zoomIn' | 'zoomOut', nowZoom?: number) => {
     if (!this.state.isValidFile) return;
-    const { onZoomChange } = this.props;
     const { zoom } = this.state;
     const changeZoom = type === 'zoomIn' ? waveConfig.zoomStep : -waveConfig.zoomStep;
     nowZoom = nowZoom ? nowZoom : zoom + changeZoom;
-    if (nowZoom < 100) return;
-    this.setState({ zoomRatio: `${nowZoom}%` });
-    onZoomChange && onZoomChange(nowZoom);
+    if (nowZoom < 100) nowZoom = 100;
+    if (zoom === 100 && zoom === nowZoom) return;
 
-    this.setState({ zoom: nowZoom }, () => {
+    this.setState({ zoom: nowZoom, zoomRatio: `${nowZoom}%` }, () => {
       this.getWaveHead();
       this.mainCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
       const drawStartMs = this.getZoomStartMs();
@@ -1602,7 +1599,7 @@ class Wave extends Component<TProps, TState> {
                       {waveConfig.playbackRates.map((item) => {
                         return (
                           <div
-                            className="play_back_rate"
+                            className="play_back_rate cursor"
                             key={item.label}
                             onClick={(e) => {
                               e.preventDefault();
@@ -1612,7 +1609,7 @@ class Wave extends Component<TProps, TState> {
                               return;
                             }}
                           >
-                            <span className="content">{item.value === 1 ? `${item.label}${t('common:playbackRatesNormal')}` : item.label}</span>
+                            <span className="content">{item.value === 1 ? `${item.label} (正常)` : item.label}</span>
                           </div>
                         );
                       })}
