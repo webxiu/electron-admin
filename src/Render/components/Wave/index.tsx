@@ -20,6 +20,7 @@ import { download } from '../../service';
 import fs from 'fs';
 import more_signclose from '@/Render/assets/img/wave/more_signclose.png';
 import more_signopen from '@/Render/assets/img/wave/more_signopen.png';
+import { onExportSign } from '@/Render/components/ExportSignsToExcel';
 import path from 'path';
 import { readFile } from '@/Render/utils/fs';
 import { t } from 'i18next';
@@ -231,6 +232,23 @@ class Wave extends Component<TProps, TState> {
 
     PubSub.subscribe(AppEventNames.WAVE_ACTION, (msg: string, data) => {
       this.waveAction(data);
+    });
+
+    /** 导出标注 */
+    PubSub.subscribe(AppEventNames.EXPORT_MARK, (msg: string, data: { src: string; fileName: string; fileId: number }) => {
+      const { fileId, activeFileId } = this.props;
+      if (data.fileId === fileId && this.signAll.length) {
+        const singDatas =
+          this.signAll?.map((item) => ({
+            [`标注类型`]: item.isManual ? '自定义标注' : '智能标注',
+            [`标注内容`]: item.name,
+            [`开始时间`]: utils.toHHmmss(item.startTime),
+            [`结束时间`]: utils.toHHmmss(item.endTime),
+            [`时长`]: utils.toHHmmss(item.endTime - item.startTime),
+            [`标注者`]: 'admin'
+          })) || [];
+        onExportSign(singDatas, data);
+      }
     });
   }
 
@@ -468,6 +486,14 @@ class Wave extends Component<TProps, TState> {
     this.scanSliderCtx.strokeRect(startX + scanMask.lineWidth / 2, 1, this.scanSliderWidth - scanMask.lineWidth, waveScanHeight - scanMask.lineWidth);
     this.scanSliderCtx.stroke();
 
+    // 选区超出左边和右边限制
+    const xSelectMaxMs = this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth;
+    if (this.selectEndMs < this.xAxisStartMs) {
+      this.selectEndMs = this.xAxisStartMs;
+    } else if (this.selectEndMs > xSelectMaxMs) {
+      this.selectEndMs = xSelectMaxMs;
+    }
+
     if (this.selectStartMs) {
       this.scanSliderCtx.fillStyle = selectSliderColor;
       const x = (this.selectStartMs / this.totalMs) * this.mainWaveWidth;
@@ -524,7 +550,7 @@ class Wave extends Component<TProps, TState> {
           imageData.data.set(data, 0);
           /** ======= 设置颜色 end ====== */
           createImageBitmap(imageData).then((r) => {
-            this.mainCtx.drawImage(r, 0, 0, this.mainWaveWidth, this.mainWaveHeight, 0, 8, this.mainWaveWidth, this.mainWaveHeight);
+            this.mainCtx.drawImage(r, 0, 0, this.mainWaveWidth, this.mainWaveHeight, 0, 0, this.mainWaveWidth, this.mainWaveHeight);
             if (this.isFirstUplod) {
               onDrawMainWaveFinish({ totalMs: this.totalMs });
               this.isFirstUplod = false;
@@ -1104,7 +1130,8 @@ class Wave extends Component<TProps, TState> {
   };
 
   waveAction = utils.debounce((receiveParams) => {
-    const { type, name, activeFileId } = receiveParams;
+    console.log('receiveParams', receiveParams);
+    const { type, name = 'test', activeFileId } = receiveParams;
     const { Global, fileId } = this.props;
     const { copyByteSizeLimit } = waveConfig;
     const positon = this.selectStartMs;
@@ -1172,12 +1199,14 @@ class Wave extends Component<TProps, TState> {
         const waveInsertParams: WaveEditParam = { type: 'insert', positon, size: copyBufMs, data: copyBuf };
         waveGraph.editWave(this.waveId, waveInsertParams, (res: WaveEditResult) => {
           if (res.ok) {
+            this.selectStartMs = positon;
+            this.selectEndMs = positon + copyBufMs;
             this.reDraw();
             this.setState({ hasEdit: true });
             this.updateWave();
             this.onAddAreas(positon, copyBufMs);
             this.drawSelectArea(positon, positon + copyBufMs, true);
-            Global.setCacheWaveData({});
+            // Global.setCacheWaveData({});
           }
         });
         break;
@@ -1437,12 +1466,11 @@ class Wave extends Component<TProps, TState> {
                 <canvas ref={scanSliderRef} onMouseDown={this.onSliderDown} className="wave-scan-slider"></canvas>
               </div>
 
-              <div className="wave-content" ref={clientRef}>
+              <div className="wave-content flex" ref={clientRef}>
                 <div>
-                  <canvas className="wave-content-bg" ref={bgWaveRef} onWheel={this.onWheel} onMouseDown={this.onBgDown} />
-                  <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}>
-                    <canvas className="wave-content-fore" ref={mainWaveRef} style={{ cursor: 'text' }} />
-                  </Spin>
+                  <canvas className="wave-content-bg ui-h-100" ref={bgWaveRef} onWheel={this.onWheel} onMouseDown={this.onBgDown} />
+                  {/* <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}></Spin> */}
+                  <canvas className="ui-h-100 flex-1" ref={mainWaveRef} style={{ cursor: 'text' }} />
                 </div>
                 <canvas className="wave-xAxis" ref={xAxisRef}></canvas>
               </div>
@@ -1659,7 +1687,7 @@ class Wave extends Component<TProps, TState> {
             }
             .wave-head {
               width: 100%;
-              height: 30px;
+              height: 28px;
               position: relative;
             }
             .wave-scan-slider {
@@ -1674,22 +1702,18 @@ class Wave extends Component<TProps, TState> {
               left: 0;
               z-index: 1;
             }
-
             .wave-content {
               position: relative;
+              height: 100%;
+              width: 100%;
               flex: 1;
             }
             .wave-content-bg {
               position: absolute;
+              width: 100%;
               top: 0;
               left: 0;
               z-index: 1;
-            }
-            .wave-content-force {
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 2;
             }
             .wave-bottom {
               width: 100%;

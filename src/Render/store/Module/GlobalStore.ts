@@ -15,6 +15,8 @@ export type TWaveData = {
 export default class {
   @observable public version: string;
   @observable public userInfo: UserInfoType;
+  @observable public pauseDownload = false;
+
   // 波形图操作数据暂存
   @observable public waveCacheData: TWaveData = {};
   @observable public region = { begin_time: 0, end_time: 0 };
@@ -31,6 +33,12 @@ export default class {
   @action public UpdateUserInfo = async (UserInfo: UserInfoType) => {
     runInAction(() => {
       this.userInfo = UserInfo;
+    });
+  };
+  /** 暂停下载方法 */
+  @action public setPauseDownload = async (isPause) => {
+    runInAction(() => {
+      this.pauseDownload = isPause;
     });
   };
   // 设置波形图操作过程数据

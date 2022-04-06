@@ -1,11 +1,12 @@
 import './index.less';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Wave, { SignProps } from '@/Render/components/Wave';
 
 import { AppEventNames } from '~/src/Types/EventTypes';
 import { Button } from 'antd';
 import Mousetrap from 'mousetrap';
+import WaveHeader from '@/Render/components/Wave/components/WaveHeader';
 import path from 'path';
 import { useHistory } from 'react-router';
 import utils from '@/Render/utils/index';
@@ -19,7 +20,7 @@ if (dirName.includes('app.asar') || dirName.includes('app')) {
 console.log(`dirName`, dirName);
 const Wrap: React.FC = () => {
   const { push } = useHistory();
-  const waveRef = useRef(null);
+  const waveRef = useRef<any>(null);
 
   const condenseSlice = [];
   const showAddBtn = false;
@@ -81,6 +82,13 @@ const Wrap: React.FC = () => {
     PubSub.publish(AppEventNames.WAVE_ACTION, { activeFileId, type: type });
   }, 500);
 
+  const [zoomRatio, setZoomRatio] = useState<string | number>(100);
+
+  const onZoomRatioChange = (value: number) => {
+    waveRef.current?.zoomChange('zoomIn', value);
+    setZoomRatio(value);
+  };
+
   return (
     <div className="ui-w-100">
       <div className="flex">
@@ -93,6 +101,13 @@ const Wrap: React.FC = () => {
           );
         })}
       </div>
+      <WaveHeader
+        zoomRatio={zoomRatio}
+        onZoomRatioChange={onZoomRatioChange}
+        columnName={{ file_name: '文件名', keyword: '关键词' }}
+        columnData={{ file_name: '测力计.wav', keyword: '方法' }}
+        downloadInfo={{ fileId: 0, formPath: voiceInfo.voicePath, tempName: '测力计.wav' }}
+      />
       <Wave
         ref={waveRef}
         smartSign={condenseSlice}

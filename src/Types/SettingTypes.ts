@@ -3,4 +3,6 @@ export type SettingTypes = {
   clickTotal: number;
   hotUpdater: boolean;
   serverAddr: string;
+  exportPath: string;
+  savePath: string;
 };

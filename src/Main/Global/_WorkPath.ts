@@ -60,7 +60,7 @@ export const MkdirSync = (dirName) => {
   }
 };
 
-type APPDIR = 'logs' | 'db' | 'setting.json' | 'voiceFiles' | 'tempDownloadFiles';
+type APPDIR = 'logs' | 'db' | 'setting.json' | 'voiceFiles' | 'tempDownloadFiles' | 'download';
 
 /** 获取目录, 如果目录不存在，则创建 */
 export default (type?: APPDIR, isFile = false) => {
