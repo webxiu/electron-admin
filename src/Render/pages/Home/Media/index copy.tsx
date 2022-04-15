@@ -10,7 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadItemType {
   /** 文件id */
-  file_id: string;
+  uuid: string;
+  /** 文件id */
+  file_id: number;
   /** 文件名 */
   src: string;
   /** 文件上传进度 */
@@ -21,6 +23,25 @@ export interface UploadItemType {
   /** 取消方法 */
   cancel?: (message?: string) => void;
 }
+
+const statusObj = {
+  [uploadStatus.waiting]: {
+    statusText: '等待上传',
+    color: '#40a9ff'
+  },
+  [uploadStatus.success]: {
+    statusText: '上传成功',
+    color: '#0f0'
+  },
+  [uploadStatus.fail]: {
+    statusText: '上传失败',
+    color: '#f00'
+  },
+  [uploadStatus.cancel]: {
+    statusText: '取消上传',
+    color: '#f60'
+  }
+};
 
 type ApiType = () => Promise<AxiosResponse<ResponseType>>;
 type ResponseType = {
@@ -53,6 +74,23 @@ const Media = () => {
     'https://api.gugudata.com/news/joke/demo'
   ];
 
+  const oneCallback = (status: uploadStatus, fileId, data) => {
+    // console.log('status, fileId,data', status, fileId, data);
+    if (status === uploadStatus.pending) {
+      setCancel(status, fileId, data);
+      return;
+    }
+    setResult(status, fileId, data);
+  };
+
+  const allCallback = (res) => {
+    console.log('all', res);
+  };
+
+  const onProgress = (fileId, res) => {
+    setProgress(fileId, res.progress);
+  };
+
   const onStart = (dataList: string[]) => {
     //1.获取数据的函数
     function getjokes(url) {
@@ -69,7 +107,8 @@ const Media = () => {
     for (let i = 0; i < dataList.length; i++) {
       const src = dataList[i];
       taskList.push({
-        file_id: uuidv4(),
+        uuid: uuidv4(),
+        file_id: 0,
         src: src,
         progress: 0,
         status: uploadStatus.waiting,
@@ -82,28 +121,11 @@ const Media = () => {
     }
     setItemUploadData((x) => [...taskList, ...x]);
     //3.创建实例调用，设置请求限制数为5
-    new TasksHandle<UploadItemType>(
-      taskList,
-      2,
-      (status: uploadStatus, fileId, data) => {
-        // console.log('status, fileId,data', status, fileId, data);
-        if (status === uploadStatus.pending) {
-          setCancel(status, fileId, data);
-          return;
-        }
-        setResult(status, fileId, data);
-      },
-      (res) => {
-        console.log('all', res);
-      },
-      (fileId, res) => {
-        setProgress(fileId, res.progress);
-      }
-    );
+    new TasksHandle<UploadItemType>({ taskList, maxLen: 2, oneCallback, allCallback, onProgress });
   };
 
   /** @设置进度 */
-  const setProgress = (fileId: string, progress: number) => {
+  const setProgress = (fileId: number, progress: number) => {
     setItemUploadData((data) => {
       return data.map((item) => {
         if (item.file_id === fileId) {
@@ -140,7 +162,7 @@ const Media = () => {
   /** @取消上传和清空操作  */
   const onCancel = (item: UploadItemType) => {
     /** @上传中点击 取消, 则取消请求 */
-    if (item.status === 'pending') {
+    if (item.status === uploadStatus.pending) {
       item.cancel && item.cancel();
     } else {
       /** @上传完成  删除列表 */
@@ -156,24 +178,6 @@ const Media = () => {
     });
   };
 
-  const statusObj = {
-    [uploadStatus.waiting]: {
-      statusText: '等待上传',
-      color: '#40a9ff'
-    },
-    [uploadStatus.success]: {
-      statusText: '上传成功',
-      color: '#0f0'
-    },
-    [uploadStatus.fail]: {
-      statusText: '上传失败',
-      color: '#f00'
-    },
-    [uploadStatus.cancel]: {
-      statusText: '取消上传',
-      color: '#f60'
-    }
-  };
   return (
     <div>
       Media

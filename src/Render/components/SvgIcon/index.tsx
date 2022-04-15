@@ -1,5 +1,10 @@
 import React from 'react';
-
+/**
+ * 示例
+ * <SvgIcon iconName="message" fill="#00f" style={{ color: '#0f0' }} />
+ * <SvgIcon iconName="notfound" />
+ * <SvgIcon iconName="http://localhost:8006/images/notfound.svg" />
+ */
 interface Props {
   /** svg名称或外部地址 http://www.test/abc.svg */
   iconName: string;

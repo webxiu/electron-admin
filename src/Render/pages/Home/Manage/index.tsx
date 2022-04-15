@@ -21,7 +21,7 @@ const Wrap: React.FC = () => {
       <div className="less-var">=====less变量样式====</div>
       <div className="flex">=====define通用样式====</div>
       <hr />
-
+      <div className="test-bgc" style={{ width: 200, height: 200 }}></div>
       <hr />
 
       <Input
