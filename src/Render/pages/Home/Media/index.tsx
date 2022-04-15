@@ -1,28 +1,66 @@
 import React, { useState } from 'react';
-import TasksHandle, { uploadStatus } from './task';
-import axios, { AxiosResponse, Canceler } from 'axios';
+import TasksHandle, { ProgressType } from './Upload';
 
+import { AudioSuffix } from '@/Render/config/common';
 import { Button } from 'antd';
+import { Canceler } from 'axios';
 import { SyncOutlined } from '@ant-design/icons';
 import closeIcon from '@/Render/assets/img/icons/close.png';
+import fs from 'fs';
 import information from '@/Render/assets/img/icons/information.png';
+import path from 'path';
+import { readFile } from '@/Render/utils/fs';
+import { remote } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadItemType {
   /** 文件id */
-  file_id: string;
-  /** 文件名 */
-  src: string;
+  uuid: string;
+  /** 文件id */
+  file_id: number;
+  /** 文件id */
+  file_name: string;
+  /** 文件路径文件名 */
+  file: File | FormData;
   /** 文件上传进度 */
   progress: number;
   /** 成功/失败状态 */
   status: uploadStatus;
-  // api: ApiType;
   /** 取消方法 */
   cancel?: (message?: string) => void;
 }
 
-type ApiType = () => Promise<AxiosResponse<ResponseType>>;
+export enum uploadStatus {
+  waiting = 'waiting',
+  pending = 'pending',
+  success = 'success',
+  fail = 'fail',
+  cancel = 'cancel'
+}
+
+const statusObj = {
+  [uploadStatus.waiting]: {
+    statusText: '等待上传',
+    color: '#40a9ff'
+  },
+  [uploadStatus.pending]: {
+    statusText: '上传中...',
+    color: '#fff'
+  },
+  [uploadStatus.success]: {
+    statusText: '上传成功',
+    color: '#0f0'
+  },
+  [uploadStatus.fail]: {
+    statusText: '上传失败',
+    color: '#f00'
+  },
+  [uploadStatus.cancel]: {
+    statusText: '取消上传',
+    color: '#f60'
+  }
+};
+
 type ResponseType = {
   Data: any[];
   DataStatus: object;
@@ -53,60 +91,74 @@ const Media = () => {
     'https://api.gugudata.com/news/joke/demo'
   ];
 
-  const onStart = (dataList: string[]) => {
-    //1.获取数据的函数
-    function getjokes(url) {
-      return axios({
-        method: 'get',
-        // 默认上报地址
-        url: url,
-        // cancelToken: new axios.CancelToken((cancel) => (c = cancel)),
-        headers: { 'Content-Type': 'multipart/form-data' }
+  /** @单击上传文件 */
+  const changeUpload = (e) => {
+    const mul = true;
+    remote.dialog
+      .showOpenDialog({
+        properties: mul ? ['openFile', 'multiSelections'] : ['openFile'],
+        filters: [{ name: 'file', extensions: AudioSuffix }]
+      })
+      .then(async ({ canceled, filePaths }) => {
+        if (canceled) return;
+        onStart(filePaths);
       });
-    }
-    //2.创建10条请求存入数组
+  };
+  const onStart = (dataList: string[]) => {
+    // 创建任务列表, 一次性上传多个文件 将FormData放循环外接收fd
     const taskList: UploadItemType[] = [];
     for (let i = 0; i < dataList.length; i++) {
       const src = dataList[i];
+      const fd = new FormData();
+      const buffer = readFile(src);
+      const fileName = path.basename(src);
+      const info = fs.statSync(src);
+      if (!buffer) return;
+      const file = new File([buffer], fileName, {
+        type: info.birthtimeMs.toFixed(0)
+      });
+      fd.append('file', file);
+
+      // 未获取到文件id前使用uuid
       taskList.push({
-        file_id: uuidv4(),
-        src: src,
+        uuid: uuidv4(),
+        file_id: 0,
+        file_name: fileName,
+        file: file,
         progress: 0,
         status: uploadStatus.waiting,
         cancel: undefined
-        // api: () => {
-        //   console.log(`我是请求${i}==${src}`);
-        //   return getjokes(src);
-        // }
       });
     }
     setItemUploadData((x) => [...taskList, ...x]);
     //3.创建实例调用，设置请求限制数为5
-    new TasksHandle<UploadItemType>(
-      taskList,
-      2,
-      (status: uploadStatus, fileId, data) => {
-        // console.log('status, fileId,data', status, fileId, data);
-        if (status === uploadStatus.pending) {
-          setCancel(status, fileId, data);
-          return;
-        }
-        setResult(status, fileId, data);
-      },
-      (res) => {
-        console.log('all', res);
-      },
-      (fileId, res) => {
-        setProgress(fileId, res.progress);
-      }
-    );
+    new TasksHandle<UploadItemType>({ taskList, limit: 5 }, { timeout: 0 })
+      .onCancelToken((uuid: string, cancelToken) => {
+        setCancelToken(uploadStatus.pending, uuid, cancelToken);
+      })
+      .onCancel((uuid: string, cancel) => {
+        setCancel(uploadStatus.cancel, uuid, cancel);
+      })
+      .onProgress((uuid: string, progress: ProgressType) => {
+        console.log('progress', progress);
+        // setProgress(uuid, progress.progress);
+      })
+      .onSuccess((uuid: string, res) => {
+        setResult(uploadStatus.success, uuid, res);
+      })
+      .onCatch((uuid: string, err) => {
+        setResult(uploadStatus.fail, uuid, err);
+      })
+      .onFinish<ResponseType>((res) => {
+        console.log('onFinish', res);
+      });
   };
 
   /** @设置进度 */
-  const setProgress = (fileId: string, progress: number) => {
+  const setProgress = (uuid: string, progress: number) => {
     setItemUploadData((data) => {
       return data.map((item) => {
-        if (item.file_id === fileId) {
+        if (item.uuid === uuid) {
           item.progress = progress;
         }
         return item;
@@ -114,22 +166,35 @@ const Media = () => {
     });
   };
 
-  const setResult = (status: uploadStatus, fileId, res) => {
+  const setResult = (status: uploadStatus, uuid: string, res) => {
     setItemUploadData((data) => {
       return data.map((item) => {
-        if (item.file_id === fileId) {
+        if (item.uuid === uuid) {
+          item.status = status;
+          console.log('uuid status', status);
+          // item.file_id = res
+        }
+        return item;
+      });
+    });
+  };
+  const setCancelToken = (status: uploadStatus, uuid: string, cancel: Canceler) => {
+    setItemUploadData((data) => {
+      const _data = [...data];
+      return _data.map((item) => {
+        if (item.uuid === uuid) {
+          item.cancel = cancel;
           item.status = status;
         }
         return item;
       });
     });
   };
-  const setCancel = (status, fileId, res: Canceler) => {
+  const setCancel = (status: uploadStatus, uuid: string, err) => {
     setItemUploadData((data) => {
       const _data = [...data];
       return _data.map((item) => {
-        if (item.file_id === fileId) {
-          item.cancel = res;
+        if (item.uuid === uuid) {
           item.status = status;
         }
         return item;
@@ -140,57 +205,43 @@ const Media = () => {
   /** @取消上传和清空操作  */
   const onCancel = (item: UploadItemType) => {
     /** @上传中点击 取消, 则取消请求 */
-    if (item.status === 'pending') {
+    if (item.status === uploadStatus.pending) {
       item.cancel && item.cancel();
     } else {
       /** @上传完成  删除列表 */
-      removeItem(item.file_id);
+      removeItem(item.uuid);
     }
   };
 
   /** @删除  */
-  const removeItem = (file_id) => {
+  const removeItem = (uuid) => {
     setItemUploadData((data) => {
-      const filterArr = data.filter((k) => k.file_id !== file_id);
+      const filterArr = data.filter((k) => k.uuid !== uuid);
       return filterArr;
     });
   };
 
-  const statusObj = {
-    [uploadStatus.waiting]: {
-      statusText: '等待上传',
-      color: '#40a9ff'
-    },
-    [uploadStatus.success]: {
-      statusText: '上传成功',
-      color: '#0f0'
-    },
-    [uploadStatus.fail]: {
-      statusText: '上传失败',
-      color: '#f00'
-    },
-    [uploadStatus.cancel]: {
-      statusText: '取消上传',
-      color: '#f60'
-    }
-  };
   return (
     <div>
       Media
+      <Button onClick={changeUpload}>上传</Button>
       <Button onClick={() => onStart(dataList)}>开始</Button>
       <Button onClick={() => setItemUploadData([])}>清空</Button>
       <div>
         {ItemUploadData?.map((item, index) => {
           return (
-            <div key={item.file_id}>
+            <div key={item.uuid}>
               <div className="file-list">
-                <span title={item.src} className="voice-title ellipsis">
-                  {item.file_id}_{item.src}
+                <span title={item.file_name} className="voice-title ellipsis">
+                  {item.file_name}
                 </span>
                 <div className="flex align-center">
                   {item.status === uploadStatus.pending ? (
                     <span>
-                      <span className="icon-status">上传中...{item.progress}%</span>
+                      <span className="icon-status">
+                        {statusObj[item.status].statusText}
+                        {item.progress}%
+                      </span>
                       <SyncOutlined spin className="icon-status" />
                     </span>
                   ) : (

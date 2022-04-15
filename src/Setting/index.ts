@@ -11,7 +11,7 @@ const DefaultLocalSetting: SettingTypes = {
   devTools: false,
   clickTotal: 0,
   hotUpdater: false,
-  serverAddr: 'http://localhost:5002',
+  serverAddr: 'http://localhost:5001',
   exportPath: defaultExportPath,
   savePath: defaultSavePath
 };

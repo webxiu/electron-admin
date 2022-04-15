@@ -2,10 +2,11 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { BaseServeResponse } from '~/src/Types/BaseTypes';
 import { ResponseErrorDesc } from '@/Render/config/response.config';
+import { getUserInfo } from '@/Render/utils/auth';
 import { message } from 'antd';
 
 const instance = axios.create({
-  baseURL: 'http://127.0.0.1:5002/',
+  baseURL: 'http://localhost:5001/',
   timeout: 1000 * 60 * 2,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: false
@@ -14,7 +15,7 @@ const instance = axios.create({
 /** request过滤器 */
 instance.interceptors.request.use(
   (config: AxiosResponse<BaseServeResponse<{}>>) => {
-    // config.headers['authorization'] = 'Bearer ' + Date.now() || '';
+    config.headers['Authorization'] = 'Bearer ' + getUserInfo().token;
     return config;
   },
   (err) => {
