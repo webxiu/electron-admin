@@ -22,7 +22,7 @@ export interface TaskOptionsType<T> {
 class Uploader<T extends { file: File | FormData | string; uuid?: string }> {
   private result: AxiosResponse<any>[] = []; //结果数组
   private taskList: T[] = []; //所有任务队列
-  private queue: T[] = []; // 所有待执行任务队列
+  private taskQueue: T[] = []; // 所有待执行任务队列
   private limit = 0; //    限制请求数
   private fieldID = 'uuid'; //唯一字段
   private runningNum = 0; //正在运行的个数
@@ -56,7 +56,7 @@ class Uploader<T extends { file: File | FormData | string; uuid?: string }> {
   // 将所有任务先加入队列
   private preStart = () => {
     const taskList = this.taskList;
-    taskList.forEach((task) => this.queue.push(task));
+    taskList.forEach((task) => this.taskQueue.push(task));
     this.run();
   };
   private transformData(e: ProgressEvent): ProgressType {
@@ -84,9 +84,9 @@ class Uploader<T extends { file: File | FormData | string; uuid?: string }> {
   }
 
   private run() {
-    while (this.runningNum < this.limit && this.queue.length) {
+    while (this.runningNum < this.limit && this.taskQueue.length) {
       this.runningNum++;
-      const task = this.queue.shift();
+      const task = this.taskQueue.shift();
       if (!task) return;
       this.initParams(task.file);
       const uniqueId = this.fieldID || task.uuid;
@@ -119,32 +119,26 @@ class Uploader<T extends { file: File | FormData | string; uuid?: string }> {
     }
   }
 
-  /** 请求进度(仅适应于上传) */
   public onProgress(callback?: (uuid: string, progressEvent: ProgressType) => void): this {
     this._onProgress = callback;
     return this;
   }
-  /** 返回取消请求回调(用于取消点击项请求) */
   public onCancelToken(callback?: (uuid: string, cancel: Canceler) => void): this {
     this._onCancelToken = callback;
     return this;
   }
-  /** 所有任务完成回调 */
   public onFinish<T>(callback?: (response: AxiosResponse<T>[]) => void): this {
     this._onFinish = callback;
     return this;
   }
-  /** 单个任务成功回调 */
   public onSuccess<T>(callback?: (uuid: string, response: AxiosResponse<T>) => void): this {
     this._onSuccess = callback;
     return this;
   }
-  /** 单个任务失败回调 */
   public onCatch(callback?: (uuid: string, error: Error) => void): this {
     this._onCatch = callback;
     return this;
   }
-  /** 取消请求的失败回调 */
   public onCancel(callback?: (uuid: string, cancelError: Error) => void): this {
     this._onCancel = callback;
     return this;
