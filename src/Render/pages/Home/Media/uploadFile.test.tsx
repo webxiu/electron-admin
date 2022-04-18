@@ -1,22 +1,30 @@
-import { AxiosResponse, Canceler, Method } from 'axios';
-import React, { useState } from 'react';
+import { AxiosResponse, Canceler } from 'axios';
+import React, { useRef, useState } from 'react';
+import Uploader, { ProgressType } from '@/Render/axios/Uploader';
 
+import { AudioSuffix } from '@/Render/config/common';
 import { Button } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
-import Uploader from '@/Render/axios/Request';
+import UploadFile from '@/Render/components/Upload/UploadFile';
 import closeIcon from '@/Render/assets/img/icons/close.png';
+import fs from 'fs';
 import information from '@/Render/assets/img/icons/information.png';
+import path from 'path';
+import { readFile } from '@/Render/utils/fs';
+import { remote } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadItemType {
   /** 文件id */
   uuid: string;
-  /** 标题 */
-  title: string;
-  /** 请求地址 */
-  url: string;
-  /** 请求方法 */
-  method: Method;
+  /** 文件id */
+  file_id: number;
+  /** 文件id */
+  file_name: string;
+  /** 文件路径文件名 */
+  file: File | FormData;
+  /** 文件上传进度 */
+  progress: number;
   /** 成功/失败状态 */
   status: uploadStatus;
   /** 取消方法 */
@@ -60,36 +68,82 @@ type ResponseType = {
 };
 
 const Media = () => {
+  const uploadRef = useRef<HTMLInputElement>(null);
   const [ItemUploadData, setItemUploadData] = useState<UploadItemType[]>([]);
+  const dataList = [
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo',
+    'https://api.gugudata.com/news/joke/demo'
+  ];
+
+  /** @单击上传文件 */
+  const changeUpload = (e) => {
+    const mul = true;
+    remote.dialog
+      .showOpenDialog({
+        properties: mul ? ['openFile', 'multiSelections'] : ['openFile'],
+        filters: [{ name: 'file', extensions: AudioSuffix }]
+      })
+      .then(async ({ canceled, filePaths }) => {
+        if (canceled) return;
+        onStart(filePaths);
+      });
+  };
+
+  const uploadFiles = (files: File[]) => {
+    console.log('files', files);
+    onStart(files);
+  };
 
   /** 文件路径列表或文件列表 */
-  const onSend = () => {
-    const dataList: UploadItemType[] = [
-      { uuid: uuidv4(), method: 'GET', title: '1数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '2数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '3数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '4数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '5数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '6数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '7数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '8数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '9数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '10数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '11数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '12数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '13数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '14数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '15数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '16数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '17数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '18数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '19数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '20数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting }
-    ];
-    onStart(dataList);
-  };
-  /** 文件路径列表或文件列表 */
-  const onStart = (taskList: Array<UploadItemType>) => {
+  const onStart = (dataList: Array<string | File>) => {
+    // 创建任务列表, 一次性上传多个文件 将FormData放循环外接收fd
+    const taskList: UploadItemType[] = [];
+    for (let i = 0; i < dataList.length; i++) {
+      const src = dataList[i];
+      let fileName: string = '';
+      let file: File;
+      if (typeof src === 'string') {
+        const fd = new FormData();
+        const buffer = readFile(src);
+        fileName = path.basename(src);
+        const info = fs.statSync(src);
+        if (!buffer) return;
+        file = new File([buffer], fileName, { type: info.birthtimeMs.toFixed(0) });
+        fd.append('file', file);
+      } else {
+        file = src;
+        fileName = src.name;
+      }
+
+      // 未获取到文件id前使用uuid
+      taskList.push({
+        uuid: uuidv4(),
+        file_id: 0,
+        file_name: fileName,
+        file: file,
+        progress: 0,
+        status: uploadStatus.waiting,
+        cancel: undefined
+      });
+    }
     setItemUploadData((x) => [...taskList, ...x]);
     //3.创建实例调用，设置请求限制数为2
     new Uploader<UploadItemType>({ taskList, limit: 2 }, { timeout: 0 })
@@ -98,6 +152,10 @@ const Media = () => {
       })
       .onCancel((uuid: string, cancel) => {
         setResult(uploadStatus.cancel, uuid, cancel);
+      })
+      .onProgress((uuid: string, progress: ProgressType) => {
+        console.log('progress', progress);
+        // setProgress(uuid, progress.progress);
       })
       .onSuccess<ResponseType>((uuid: string, res) => {
         setResult(uploadStatus.success, uuid, res);
@@ -110,21 +168,31 @@ const Media = () => {
       });
   };
 
+  /** @设置进度 */
+  const setProgress = (uuid: string, progress: number) => {
+    setItemUploadData((data) => {
+      return data.map((item) => {
+        if (item.uuid === uuid) {
+          item.progress = progress;
+        }
+        return item;
+      });
+    });
+  };
+
   const setResult = (status: uploadStatus, uuid: string, res: AxiosResponse<ResponseType> | Canceler | Error) => {
     setItemUploadData((data) => {
       const _data = [...data];
       return _data.map((item) => {
         if (item.uuid === uuid) {
-          item.status = status;
-          if (status === uploadStatus.pending) {
+          if (item.status === uploadStatus.pending) {
             item.cancel = res as Canceler;
-          } else if (status === uploadStatus.cancel) {
+          } else if (item.status === uploadStatus.cancel) {
             const err = res as Error;
             console.log('err', err);
-          } else if (status === uploadStatus.success) {
-            const success = res as AxiosResponse<ResponseType>;
-            console.log('success:uuid', success);
           }
+          item.status = status;
+          console.log('setResult status---res:', status, res);
         }
         return item;
       });
@@ -153,20 +221,25 @@ const Media = () => {
   return (
     <div>
       Media
-      <Button onClick={onSend}>开始</Button>
+      <Button onClick={changeUpload}>上传路径</Button>
+      <UploadFile multiple={true} isDir={false} accept={['.wav']} ref={uploadRef} onChange={uploadFiles} />
+      <Button onClick={() => onStart(dataList)}>开始</Button>
       <Button onClick={() => setItemUploadData([])}>清空</Button>
       <div>
         {ItemUploadData?.map((item, index) => {
           return (
             <div key={item.uuid}>
               <div className="file-list">
-                <span title={item.title} className="voice-title ellipsis">
-                  {item.title}
+                <span title={item.file_name} className="voice-title ellipsis">
+                  {item.file_name}
                 </span>
                 <div className="flex align-center">
                   {item.status === uploadStatus.pending ? (
                     <span>
-                      <span className="icon-status">{statusObj[item.status].statusText}</span>
+                      <span className="icon-status">
+                        {statusObj[item.status].statusText}
+                        {item.progress}%
+                      </span>
                       <SyncOutlined spin className="icon-status" />
                     </span>
                   ) : (
