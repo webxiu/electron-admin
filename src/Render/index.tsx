@@ -1,5 +1,7 @@
 import '@/Render/assets/css/style.less';
 import '@/Render/assets/icons';
+import '~/language/i18n';
+import '@/Render/assets/language';
 
 import App from '@/Render/routes';
 import ReactDOM from 'react-dom';

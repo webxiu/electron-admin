@@ -5,6 +5,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
   module: {
     rules: [
+      {
+        test: /.*\.(tsx|ts)$/,
+        exclude: [Core.JoinCwd('node_modules'), Core.JoinCwd('src', 'Render/assets/langage')],
+        include: Core.JoinCwd('src', 'Render'),
+        loader: Core.JoinCwd('language', 'lib'),
+      },
       config.eslint && {
         test: /\.(tsx|ts)$/,
         enforce: 'pre',
