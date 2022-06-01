@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button } from 'antd';
+import clipboardXh from '~/source/batch-clipboard-xh';
 import { useHistory } from 'react-router';
 
 const child_process = require('child_process');
@@ -50,10 +51,17 @@ const Wrap: React.FC = () => {
       });
     });
   };
+  const onRead = () => {
+    console.log('clipboardXh', clipboardXh.readFilePaths());
+  };
 
   return (
     <div>
       <div className="box">
+        <hr />
+        <Button type="primary" onClick={onRead}>
+          读取剪切板
+        </Button>
         <hr />
         <Button type="primary" onClick={() => push('/login')}>
           退出

@@ -10,6 +10,7 @@ let PackageJson = require('../../package.json');
 const config = require('../../config');
 
 const buildPackageFilePath = path.join(process.cwd(), 'package.json');
+const langConfig = path.join(process.cwd(), 'language/config.conf');
 const { BUILD_NUMBER } = process.env;
 
 /**
@@ -27,15 +28,18 @@ if (BUILD_NUMBER) {
   __PackageJson.version = `${__PackageJson.version}-${process.env.BUILD_NUMBER}`;
 }
 
+/** 是否线上打包语言 */
+const prodLang = process.env.PROD_LAN || process.env.LANGUAGE
+
 // 根据环境变量修改build的nsis的向导语言installerLanguages
 if (process.env.LANGUAGE) {
-  const languages = config.languages;
-  const appConfig = languages[process.env.LANGUAGE];
-  const { appLang, appName, appWinIcon } = appConfig;
-
-  appLang && (__PackageJson.build.nsis.installerLanguages = appLang);
-  appName && (__PackageJson.build.productName = appName);
-  appWinIcon && (__PackageJson.build.win.icon = appWinIcon);
+  const langObj = config.appConfig[prodLang]
+  __PackageJson.build.nsis.installerLanguages = langObj.sysLang;
+  __PackageJson.build.productName = langObj.appName || PackageJson.name;
+  __PackageJson.build.win.icon = langObj.appIcon;
 }
+const localLangConf = { language: prodLang }
 
+/** 选择语言打包, 并写入本地配置文件, 默认以打包语言启动 */
+fs.writeFileSync(langConfig, JSON.stringify(localLangConf, null, 2), { encoding: 'utf-8' });
 fs.writeFileSync(buildPackageFilePath, JSON.stringify(__PackageJson, null, 2), { encoding: 'utf-8' });

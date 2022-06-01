@@ -1,0 +1,28 @@
+{
+  "name": "electron-clipboard-xh",
+  "version": "1.0.0",
+  "description": "Electron中读取剪切板数据, Extended electron.js clipboard module and From author kenan2002",
+  "main": "index.js",
+  "os": [
+    "darwin",
+    "win32"
+  ],
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "homepage": "https://github.com/kenan2002/electron-clipboard-ex",
+  "author": "kenan2002",
+  "license": "MIT",
+  "dependencies": {
+    "node-addon-api": "^4.0.0",
+    "node-gyp-build": "^4.2.3"
+  },
+  "gypfile": true,
+  "devDependencies": {
+    "fs-extra": "^10.0.0",
+    "jest": "^27.0.6",
+    "prebuildify": "^4.2.0"
+  }
+}

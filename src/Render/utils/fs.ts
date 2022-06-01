@@ -1,3 +1,5 @@
+import { AudioSuffix } from '@/Render/config/common';
+import clipboardXh from '~/source/batch-clipboard-xh';
 import fs from 'fs';
 import path from 'path';
 
@@ -69,4 +71,39 @@ export function readFile(path: string) {
     }
   }
   return undefined;
+}
+
+/**
+ * 写入日志
+ */
+export function appendWriteLog(dir: string, data) {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const fullPath = path.join(dir, `appServer_${year}_${month}_${day}.log`);
+  const time = `\r\n====Log Time:${date.toLocaleString()}:\n`;
+  fs.appendFile(fullPath, `${time}${data}`, 'utf8', (err: NodeJS.ErrnoException) => {
+    if (err) {
+      console.log('=====Log Write Fail!:', err);
+      throw err;
+    }
+  });
+}
+
+/**
+ * 批量获取剪切板数据
+ */
+export function getClipboardData() {
+  const copyPaths = clipboardXh.readFilePaths();
+  const pathList = copyPaths.filter((dir: string) => {
+    const stat = fs.statSync(dir);
+    const idx = dir.lastIndexOf('.');
+    const ext = dir.substring(idx + 1);
+    if (stat.isFile() && AudioSuffix.includes(ext)) {
+      return true;
+    }
+    return false;
+  });
+  return pathList;
 }

@@ -75,7 +75,7 @@ const Wrap = () => {
       <div>
         <Slider defaultValue={0} max={videoRef.current?.duration} onChange={setCurrentTime} onAfterChange={onAfterChange} />
       </div>
-      <div id="player" style={{ width: 720, height: 480 }}></div>
+      <div id="player" style={{ height: 480 }}></div>
       <style jsx>{`
         .player {
           width: 100%;

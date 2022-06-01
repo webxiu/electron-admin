@@ -13,8 +13,9 @@ export default {
     lineWidth: 1
   },
   selectArea: {
-    lineColor: '#eb5050',
-    backgroundColor: 'rgba(235, 80, 80, .5)'
+    lineColor: 'rgb(235, 79, 79, 1)', //#eb5050
+    // 通过颜色判断鼠标是否在选区刻度条上, 下面的88与上面的79不要设置相同
+    backgroundColor: 'rgba(235, 88, 88, .5)'
   },
   smartSelectArea: {
     lineColor: '#51A1EB',
@@ -40,6 +41,7 @@ export default {
     color: '#51A1EB',
     backgroundColor: 'rgba(179,215,246, .3)'
   },
+  offsetLine: 5, // 选择线前后选中偏移量
   zoomStep: 60,
   waveScanHeight: 28,
   waveMaskColor: 'rgb(246, 182, 179)',

@@ -92,5 +92,20 @@ export default {
     offset += 4;
     /** 设置数据 */ buff.set(data, offset);
     return buff;
+  },
+  findNearNum(arr: number[], num: number) {
+    let index = 0;
+    let maxValue = Number.MAX_VALUE;
+    for (let i = 0; i < arr.length; i++) {
+      const newValue = Math.abs(arr[i] - num);
+      if (newValue <= maxValue) {
+        if (newValue === maxValue && arr[i] < arr[index]) {
+          continue;
+        }
+        index = i;
+        maxValue = newValue;
+      }
+    }
+    return arr[index];
   }
 };

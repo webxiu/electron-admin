@@ -6,17 +6,26 @@ import Wave, { SignProps } from '@/Render/components/Wave';
 import { AppEventNames } from '~/src/Types/EventTypes';
 import { Button } from 'antd';
 import Mousetrap from 'mousetrap';
+import NPlayer from '@/Render/components/NPlayer';
+import ShortcutKeyMenu from '@/Render/components/Wave/components/ShortcutKeyMenu';
 import WaveHeader from '@/Render/components/Wave/components/WaveHeader';
 import path from 'path';
+import { shortcutKeyList } from '@/Render/config/wave.config';
 import { useHistory } from 'react-router';
 import utils from '@/Render/utils/index';
-import { waveOptions } from '@/Render/config/wave.config';
 
-let dirName = path.join(process.cwd(), '/public/assets/video/32k.wav');
-if (dirName.includes('app.asar') || dirName.includes('app')) {
-  dirName = path.join(process.cwd(), '/public/assets/video/32k.wav');
+// import NPlayer from './NPlayer';
+
+let rootPath = path.join(process.cwd(), '/public');
+if (rootPath.includes('app.asar') || rootPath.includes('app')) {
+  rootPath = path.join(process.cwd(), '/public');
 }
 
+const dirName = path.join(rootPath, '/assets/video/cat_wechat.wav');
+const videoDirName = path.join(rootPath, '/assets/video/cat_wechat.mp4');
+const previewPic = path.join(rootPath, '/assets/video/cat_wechat.jpg');
+
+console.log(`rootPath`, rootPath);
 console.log(`dirName`, dirName);
 const Wrap: React.FC = () => {
   const { push } = useHistory();
@@ -36,6 +45,8 @@ const Wrap: React.FC = () => {
   const getTimes = (totalTime: number) => {};
   const onSelectAreaChange = (start: number, end: number) => {};
   const onWaveFinish = (params) => {};
+
+  console.log('voiceInfo', voiceInfo);
 
   /** 注册快捷键 */
   useEffect(() => {
@@ -91,16 +102,11 @@ const Wrap: React.FC = () => {
 
   return (
     <div className="ui-w-100">
-      <div className="flex">
-        {waveOptions.map((item) => {
-          return (
-            <div key={item.key} className="flex-col just-center align-center cursor mr20" onClick={() => onWaveHandle(item.key)}>
-              <img width="16" src={item.icon} alt="" />
-              <p>{item.title}</p>
-            </div>
-          );
-        })}
+      <div>
+        <NPlayer key={0} fileId={0} duration={12} src={videoDirName} images={[previewPic]} />
       </div>
+      <ShortcutKeyMenu shortcutKeyList={shortcutKeyList} onWaveHandle={onWaveHandle} />
+
       <WaveHeader
         zoomRatio={zoomRatio}
         onZoomRatioChange={onZoomRatioChange}

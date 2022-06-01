@@ -43,6 +43,7 @@
     "mobx-react-router": "~4.1.0",
     "mousetrap": "^1.6.5",
     "nedb": "~1.8.0",
+    "nplayer": "^1.0.10",
     "pubsub-js": "^1.9.3",
     "react": "~17.0.0",
     "react-dom": "~17.0.0",
@@ -162,6 +163,7 @@
     "nodeGypRebuild": false,
     "extraFiles": [
       "server",
+      "source",
       "language"
     ],
     "win": {

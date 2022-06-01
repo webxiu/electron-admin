@@ -36,8 +36,10 @@ module.exports = smp({
       path: 'require("path")',
       http: 'require("http")',
       child_process: 'require("child_process")',
-      // '@spk/Wave-Graph-X64': 'require("@spk/Wave-Graph-X64").default',
-      './dist/WaveGraph.node': 'require("./src/Render/package/Wave-Graph-X64/dist/WaveGraph.node")'
+      // '@spk/Wave-Graph-X64': 'require("@spk/Wave-Graph-X64").default', 
+      './dist/WaveGraph.node': 'require("./source/Wave-Graph-X64/dist/WaveGraph.node")',
+      './dist/batch-clipboard-xh.node': 'require("./source/batch-clipboard-xh/dist/batch-clipboard-xh.node")'
+
     }
   ],
   resolve: {

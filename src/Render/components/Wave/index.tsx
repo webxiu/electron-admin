@@ -1,13 +1,15 @@
 import { Button, Popover, Select, Spin, message } from 'antd';
 import React, { Component, createRef } from 'react';
+import { ShortcutKeyItemType, shortcutKeyDefaultList } from '@/Render/config/wave.config';
 import { execFfmpeg, sampleObj, saveFfmpeg } from './ffmpeg';
 import { inject, observer } from 'mobx-react';
-import waveGraph, { WaveEditParam, WaveEditResult, WaveUndoResult } from '@/Render/package/Wave-Graph-X64';
+import waveGraph, { WaveEditParam, WaveEditResult, WaveUndoResult } from '~/source/Wave-Graph-X64';
 
 import { AppEventNames } from '~/src/Types/EventTypes';
 import Mousetrap from 'mousetrap';
 import PubSub from 'pubsub-js';
 import SignTable from './components/SignTable';
+import { VIDEO_STATUS } from '@/Render/components/NPlayer';
 import atlas_big from '@/Render/assets/img/wave/atlas_big.png';
 import atlas_eyesclose from '@/Render/assets/img/wave/atlas_eyesclose.png';
 import atlas_eyesopen from '@/Render/assets/img/wave/atlas_eyesopen.png';
@@ -109,8 +111,12 @@ type TProps = {
   smartSignTitle?: string;
   /** 是否为以音搜音图谱(用于标注折叠表格配置) */
   isSearchVoiceSign?: boolean;
+  /** 是否为以音搜音图谱(用于标注折叠表格配置) */
+  onZoomChange?: (zoom: number) => void;
   /** 不同标记颜色 */
   signsColors?: string[];
+  /** 右键菜单列表 */
+  contextMenuList?: ShortcutKeyItemType[];
 };
 
 type TState = {
@@ -136,6 +142,7 @@ type TState = {
 
 const noop = () => {};
 let cacheWaveId = {};
+let PlayBarTimer: NodeJS.Timeout;
 
 @inject('Global')
 @observer
@@ -149,7 +156,9 @@ class Wave extends Component<TProps, TState> {
     yAxisRef: createRef<HTMLCanvasElement>(),
     clientRef: createRef<HTMLDivElement>(),
     signRef: createRef<HTMLCanvasElement>(),
-    smartSignRef: createRef<HTMLCanvasElement>()
+    smartSignRef: createRef<HTMLCanvasElement>(),
+    signAreaRef: createRef<HTMLDivElement>(),
+    contextMenuRef: createRef<HTMLDivElement>()
   };
   scanSliderCtx: CanvasRenderingContext2D;
   scanWaveCtx: CanvasRenderingContext2D;
@@ -208,6 +217,9 @@ class Wave extends Component<TProps, TState> {
   isFirstUplod = true;
   yAxisWidth = 30;
   xAxisStartMs = 0; // 图谱可视区域的开始时间(滚动变化)
+  EventClock = ''; // 全局移动事件锁, 避免与顶部滑块冲突(onBgDown/onSliderDown)
+  InTimeLine = false; // 是否在时间线上点击
+  selectTimeLine = ''; // L:开始时间线  R:结束时间线 M:播放时间线
 
   constructor(props) {
     super(props);
@@ -218,14 +230,49 @@ class Wave extends Component<TProps, TState> {
   componentDidMount() {
     this.initCanvas();
     this.loadFile();
+    const { fileId, activeFileId } = this.props;
+    const { clientRef, contextMenuRef } = this.domRefs;
+    window.addEventListener('resize', this.handleResize);
     window.addEventListener(
       'click',
       utils.debounce(() => {
+        if (contextMenuRef.current) {
+          contextMenuRef.current.style.display = 'none';
+        }
         this.setState({ playbackRateVisible: false });
       })
     );
 
-    window.addEventListener('resize', this.handleResize);
+    /** 展开标记滚动不隐藏处理 */
+    window.addEventListener('wheel', (e: any) => {
+      let inPopoverScroll: boolean = false;
+      const signsPopoverClassName = ['sign-scroll-event', 'ant-table-cell', 'ant-popover-title', 'ant-popover-inner-content', 'SVGAnimatedString'];
+      for (let i = 0; i < signsPopoverClassName.length; i++) {
+        const classStr = signsPopoverClassName[i];
+        const popClassName = e.target.className.toString();
+        if (popClassName.indexOf(classStr) > -1) {
+          inPopoverScroll = true;
+          break;
+        }
+      }
+      if (inPopoverScroll) return;
+
+      const { manualSignListVisible, smartSignListVisible } = this.state;
+      if (manualSignListVisible) {
+        this.setState({ manualSignListVisible: false });
+      }
+      if (smartSignListVisible) {
+        this.setState({ smartSignListVisible: false });
+      }
+    });
+
+    /** 监听折叠重新加载图谱 */
+    PubSub.subscribe(AppEventNames.RELOAD_WAVE, (msg: string) => {
+      if (this.waveId > -1) {
+        this.handleResize();
+      }
+    });
+
     this.subToken = PubSub.subscribe('stopAllAudio', (name: string, isPlay: boolean) => {
       this.pause();
     });
@@ -236,7 +283,6 @@ class Wave extends Component<TProps, TState> {
 
     /** 导出标注 */
     PubSub.subscribe(AppEventNames.EXPORT_MARK, (msg: string, data: { src: string; fileName: string; fileId: number }) => {
-      const { fileId, activeFileId } = this.props;
       if (data.fileId === fileId && this.signAll.length) {
         const singDatas =
           this.signAll?.map((item) => ({
@@ -250,16 +296,79 @@ class Wave extends Component<TProps, TState> {
         onExportSign(singDatas, data);
       }
     });
+
+    /** 接收播放器事件 */
+    PubSub.subscribe(AppEventNames.CONTROL_WAVE, (msg: string, params) => {
+      const { currentTime, playing, videoFileId } = params.data;
+
+      if (currentTime === undefined || videoFileId !== fileId || !this.audio) {
+        return;
+      }
+      const startXMs = currentTime * 1000;
+      const startX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, startXMs, this.state.zoom);
+      const startScanX = startX * (this.scanSliderWidth / this.mainWaveWidth);
+      const waveMaxMs = startXMs + this.actualPerPxMeamMs * this.mainWaveWidth;
+
+      this.prevScanStartX = startScanX;
+      this.audio.currentTime = currentTime;
+      this.selectStartMs = startXMs;
+      this.selectEndMs = startXMs;
+
+      if (params.type !== VIDEO_STATUS.seek) {
+        playing && !this.state.hasEdit ? this.play() : this.pause(startXMs);
+      } else {
+        this.setState({ playCurrentTime: startXMs });
+
+        // 更新
+        this.drawTimeLine(startScanX, true);
+        if (waveMaxMs > this.totalMs) {
+          return;
+        }
+        this.drawSign();
+        this.drawMultiSelectArea();
+        this.drawSelectArea(this.selectStartMs, this.selectEndMs, true, false);
+        this.drawXAxis(startXMs);
+        this.updateMainWave(startXMs);
+        this.drawTimeLine(startScanX, true);
+      }
+    });
+
+    /** 注册默认快捷键 */
+    shortcutKeyDefaultList.forEach((s) => {
+      Mousetrap.bind(s.key, (e: KeyboardEvent) => {
+        e.preventDefault();
+        this.waveAction({ type: s.type });
+      });
+    });
+
+    // 右键菜单位置
+    clientRef.current?.addEventListener('contextmenu', (e: any) => {
+      if (!e.target || !contextMenuRef.current) return;
+      const waveContextMenu = document.querySelectorAll('.wave-context_menu');
+      waveContextMenu.forEach((mDom: HTMLDivElement) => {
+        mDom.style.display = 'none';
+      });
+
+      if (e.target.id === `bg_wave_${fileId}`) {
+        contextMenuRef.current.style.display = 'block';
+        contextMenuRef.current.style.position = 'fixed';
+        contextMenuRef.current.style.top = e.clientY + 'px';
+        contextMenuRef.current.style.left = e.clientX + 'px';
+      } else {
+        contextMenuRef.current.style.display = 'none';
+      }
+    });
   }
 
   componentWillUnmount() {
-    this.pause();
-    cacheWaveId = {};
-    Mousetrap.unbind('space');
-    waveGraph.releaseDraw(this.waveId);
-    PubSub.unsubscribe(this.subToken);
-    PubSub.unsubscribe(AppEventNames.WAVE_ACTION);
     window.removeEventListener('resize', this.handleResize);
+    PubSub.unsubscribe(this.subToken);
+    PubSub.unsubscribe(`WAVE_ACTION_${this.props.fileId}`);
+    PubSub.unsubscribe(AppEventNames.EXPORT_MARK);
+    PubSub.unsubscribe(AppEventNames.CONTROL_WAVE);
+    PubSub.unsubscribe(AppEventNames.RELOAD_WAVE);
+    cacheWaveId = {};
+    shortcutKeyDefaultList.forEach((s) => Mousetrap.unbind(s.key));
   }
 
   resize = () => {
@@ -292,7 +401,7 @@ class Wave extends Component<TProps, TState> {
   }
 
   initCanvas = () => {
-    const { scanWaveRef, bgWaveRef, mainWaveRef, clientRef, xAxisRef, yAxisRef, scanSliderRef, signRef, smartSignRef } = this.domRefs;
+    const { scanWaveRef, bgWaveRef, mainWaveRef, clientRef, xAxisRef, yAxisRef, scanSliderRef, signRef, smartSignRef, contextMenuRef } = this.domRefs;
     if (
       !clientRef.current ||
       !mainWaveRef.current ||
@@ -301,7 +410,8 @@ class Wave extends Component<TProps, TState> {
       !yAxisRef.current ||
       !bgWaveRef.current ||
       !scanSliderRef.current ||
-      !signRef.current
+      !signRef.current ||
+      !contextMenuRef.current
     )
       return;
 
@@ -379,9 +489,9 @@ class Wave extends Component<TProps, TState> {
   };
 
   loadFile = async () => {
-    const { onDuration = noop, selectArea, smartSign = [] } = this.props;
+    const { onDuration = noop, selectArea, smartSign = [], fileId } = this.props;
 
-    if (cacheWaveId[this.props.fileId]) return;
+    if (cacheWaveId[fileId]) return;
     await this.loadAudio().catch(console.error);
     if (!this.isExistPath()) return;
     this.waveId = waveGraph.createDraw(this.filePath);
@@ -390,7 +500,7 @@ class Wave extends Component<TProps, TState> {
       console.error('文件读取失败！');
       return;
     }
-    cacheWaveId[this.props.fileId] = this.waveId;
+    cacheWaveId[fileId] = this.waveId;
     this.getWaveHead();
 
     onDuration(this.totalMs);
@@ -487,14 +597,7 @@ class Wave extends Component<TProps, TState> {
     this.scanSliderCtx.stroke();
 
     // 选区超出左边和右边限制
-    const xSelectMaxMs = this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth;
-    if (this.selectEndMs < this.xAxisStartMs) {
-      this.selectEndMs = this.xAxisStartMs;
-    } else if (this.selectEndMs > xSelectMaxMs) {
-      this.selectEndMs = xSelectMaxMs;
-    }
-
-    if (this.selectStartMs) {
+    if (this.selectStartMs || this.selectEndMs) {
       this.scanSliderCtx.fillStyle = selectSliderColor;
       const x = (this.selectStartMs / this.totalMs) * this.mainWaveWidth;
       const w = ((this.selectEndMs - this.selectStartMs) / this.totalMs) * this.mainWaveWidth;
@@ -525,41 +628,45 @@ class Wave extends Component<TProps, TState> {
         // backgroudcolor,
         // wavecolor
       };
-      // this.setState({ mainLoading: true });
-      waveGraph.getGraphCanvasData({
-        ...params,
-        cb: (buff) => {
-          // 将uint8Array类型的buff转化为Uint8ClampedArray
-          const uint8ClapedBuf = new Uint8ClampedArray(Array.from(buff));
-          const imageData = new ImageData(uint8ClapedBuf, this.mainWaveWidth, this.mainWaveHeight);
-          /** ======= 设置颜色 start ====== */
-          const [br, bg, bb] = backgroudcolor;
-          const [cr, cg, cb] = wavecolor;
-          const data = imageData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i] === 49 && data[i + 1] === 49 && data[i + 2] === 49) {
-              data[i] = cr;
-              data[i + 1] = cg;
-              data[i + 2] = cb;
-            } else {
-              data[i] = br;
-              data[i + 1] = bg;
-              data[i + 2] = bb;
+      try {
+        // this.setState({ mainLoading: true });
+        waveGraph.getGraphCanvasData({
+          ...params,
+          cb: (buff) => {
+            // 将uint8Array类型的buff转化为Uint8ClampedArray
+            const uint8ClapedBuf = new Uint8ClampedArray(Array.from(buff));
+            const imageData = new ImageData(uint8ClapedBuf, this.mainWaveWidth, this.mainWaveHeight);
+            /** ======= 设置颜色 start ====== */
+            const [br, bg, bb] = backgroudcolor;
+            const [cr, cg, cb] = wavecolor;
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              if (data[i] === 49 && data[i + 1] === 49 && data[i + 2] === 49) {
+                data[i] = cr;
+                data[i + 1] = cg;
+                data[i + 2] = cb;
+              } else {
+                data[i] = br;
+                data[i + 1] = bg;
+                data[i + 2] = bb;
+              }
             }
+            imageData.data.set(data, 0);
+            /** ======= 设置颜色 end ====== */
+            createImageBitmap(imageData).then((r) => {
+              this.mainCtx.drawImage(r, 0, 0, this.mainWaveWidth, this.mainWaveHeight, 0, 0, this.mainWaveWidth, this.mainWaveHeight);
+              if (this.isFirstUplod) {
+                onDrawMainWaveFinish({ totalMs: this.totalMs });
+                this.isFirstUplod = false;
+              }
+              resolve(true);
+              // this.setState({ mainLoading: false });
+            });
           }
-          imageData.data.set(data, 0);
-          /** ======= 设置颜色 end ====== */
-          createImageBitmap(imageData).then((r) => {
-            this.mainCtx.drawImage(r, 0, 0, this.mainWaveWidth, this.mainWaveHeight, 0, 0, this.mainWaveWidth, this.mainWaveHeight);
-            if (this.isFirstUplod) {
-              onDrawMainWaveFinish({ totalMs: this.totalMs });
-              this.isFirstUplod = false;
-            }
-            resolve(true);
-            // this.setState({ mainLoading: false });
-          });
-        }
-      });
+        });
+      } catch (error) {
+        console.log('drawMainWave Error:', error);
+      }
     });
   };
 
@@ -607,6 +714,13 @@ class Wave extends Component<TProps, TState> {
     return currentScanX / (this.scanSliderWidth / this.mainWaveWidth);
   };
 
+  getNewPxStartMs(posPx) {
+    // 坐标移动 获取最新的开始时间
+    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
+    const newStartMs = Math.floor(waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posPx, this.state.zoom) + mainHasMovedMs);
+    return newStartMs;
+  }
+
   // 点击播放开始绘制
   drawPlay = () => {
     const { playing, zoom } = this.state;
@@ -618,10 +732,12 @@ class Wave extends Component<TProps, TState> {
       this.playIndex++;
       if (this.playIndex === this.playList.length) {
         this.pause();
+        this.onControlVideo(VIDEO_STATUS.pause, { currentTime: playStartMs / 1000 });
         return;
       }
       playStartMs = this.playList[this.playIndex].startTime;
       this.audio.currentTime = playStartMs / 1000;
+      this.onControlVideo(VIDEO_STATUS.play, { currentTime: playStartMs / 1000 });
     }
     this.animationId = window.requestAnimationFrame(async () => {
       const hasMovedX = this.getMainHasMovedX();
@@ -661,10 +777,11 @@ class Wave extends Component<TProps, TState> {
       audioPromise
         .then(() => {
           this.setState({ playing: true });
+          this.onControlVideo(VIDEO_STATUS.play, { currentTime: playCurrentTime / 1000 });
           this.drawPlay();
         })
         .catch((e) => {
-          message.error(t('common:cannotPlay'));
+          message.error('暂不支持播放');
         });
     }, 100);
   };
@@ -684,13 +801,15 @@ class Wave extends Component<TProps, TState> {
     this.playIndex = selectPlayIndex > -1 ? selectPlayIndex : 0;
 
     this.playList = playList.length ? playList : [{ startTime: 0, endTime: this.totalMs }];
-    const playCurrentTime = playList.length ? this.playList[this.playIndex].startTime : this.state.playCurrentTime;
+    const rePlayInitTime = this.state.playCurrentTime === this.totalMs ? 0 : this.state.playCurrentTime;
+    const playCurrentTime = playList.length ? this.playList[this.playIndex].startTime : rePlayInitTime;
     return playCurrentTime;
   };
 
   pause = (playCurrentTime?: number) => {
     playCurrentTime = playCurrentTime || this.initPlay();
     this.audio?.pause();
+    this.onControlVideo(VIDEO_STATUS.pause, { currentTime: this.selectStartMs / 1000 });
     if (this.animationId) window.cancelAnimationFrame(this.animationId);
     this.setState({ playing: false, playCurrentTime });
   };
@@ -702,22 +821,19 @@ class Wave extends Component<TProps, TState> {
     const mainHasMovedMs = this.getMainHasMovedX(startScanX) * this.actualPerPxMeamMs;
     startTime = startTime - mainHasMovedMs;
     endTime = endTime - mainHasMovedMs;
-    const { lineWidth } = waveConfig.playLineConfig;
-    const { Ystart } = waveConfig.mainWaveConfig;
-    const { lineColor, backgroundColor } = isManual ? waveConfig.selectArea : waveConfig.smartSelectArea;
+    const { backgroundColor } = isManual ? waveConfig.selectArea : waveConfig.smartSelectArea;
     clearnBg && this.bgCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
     const signBgColor = signsColors?.length && signCate ? signsColors[signCate % signsColors.length] : backgroundColor;
     this.bgCtx.fillStyle = signBgColor;
     const startX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, startTime, this.state.zoom);
     const endX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, endTime, this.state.zoom);
     if (startX) {
-      waveUtil.drawOnePixelLineTo(this.bgCtx, startX, Ystart, startX, this.mainWaveHeight, lineColor, lineWidth);
+      this.drawTimeLine(startX, false);
     }
     if (endX) {
-      waveUtil.drawOnePixelLineTo(this.bgCtx, endX, Ystart, endX, this.mainWaveHeight, lineColor, lineWidth);
+      this.drawTimeLine(endX, false);
     }
     this.bgCtx.fillRect(startX, 0, endX - startX, this.mainWaveHeight);
-
     isManual && this.drawScanSlider(startScanX, false);
   };
 
@@ -729,78 +845,198 @@ class Wave extends Component<TProps, TState> {
     });
   };
 
+  getRealPos = (e) => {
+    const { clientX, clientY } = e;
+    const { left, top } = e.target.getBoundingClientRect();
+    const x = clientX - left;
+    const y = clientY - top;
+    return { x, y };
+  };
+  /** 获取坐标参数 */
+  getDirection = (e) => {
+    const { x, y } = this.getRealPos(e);
+    const { offsetLine, selectArea } = waveConfig;
+    const startX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, this.selectStartMs, this.state.zoom));
+    const endX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, this.selectEndMs, this.state.zoom));
+    const moveMs = this.getNewPxStartMs(x);
+    const moveX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, moveMs, this.state.zoom));
+
+    // 移动鼠标前后偏差offsetLine个像素对齐(兼容缩放)
+    const inStart = moveX >= startX - offsetLine && moveX <= startX + offsetLine;
+    const inEnd = moveX >= endX - offsetLine && moveX <= endX + offsetLine;
+    const nearPos = inStart || inEnd;
+
+    const nearValue = waveUtil.findNearNum([this.selectStartMs, this.selectEndMs], moveMs);
+    const isAreaColor = this.bgCtx.getImageData(x, y, 1, 1).data[1];
+    const twoColor = Number(selectArea.backgroundColor.split(',')[1]);
+    // 通过选区颜色的第二个颜色值(88)与图谱背景颜色(0),判断鼠标是否在选择线上
+    const moveIn = ![twoColor, 0].includes(isAreaColor) || nearPos;
+
+    let selectTimeLine: string = '';
+    if (moveIn) {
+      if (this.selectStartMs === this.selectEndMs) {
+        selectTimeLine = 'M';
+      } else if (nearValue === this.selectStartMs) {
+        selectTimeLine = 'L';
+      } else if (nearValue === this.selectEndMs) {
+        selectTimeLine = 'R';
+      }
+    }
+    return { x, y, moveIn, selectTimeLine, moveMs };
+  };
+  /** 仅改变鼠标形状 */
+  onMainMouseMove = (e) => {
+    const { bgWaveRef } = this.domRefs;
+    if (!bgWaveRef.current) return;
+    const { moveIn } = this.getDirection(e);
+    const cursor = moveIn ? 'col-resize' : 'default';
+    bgWaveRef.current.style.cursor = cursor;
+  };
+
   onBgDown = (e) => {
     e.persist();
     const { bgWaveRef } = this.domRefs;
-    const { Global } = this.props;
-    if (!bgWaveRef.current) return;
+    if (!bgWaveRef.current || e.button !== 0) return;
+    this.EventClock = 'onBgDown';
+    const direction = this.getDirection(e);
     this.isDrawing = true;
-    const rect = e.target.getBoundingClientRect();
-    const posPx = e.clientX - rect.left;
-    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
-    this.selectStartMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posPx, this.state.zoom) + mainHasMovedMs;
-    Global.setRegion({
-      ...Global.region,
-      begin_time: this.selectStartMs
-    });
-    Global.setTotalMs(this.totalMs);
+    this.InTimeLine = direction.moveIn;
+    this.selectTimeLine = direction.selectTimeLine;
+    if (!this.InTimeLine) {
+      this.selectStartMs = this.getNewPxStartMs(direction.x);
+      this.selectEndMs = this.selectStartMs;
+    }
+    this.pause(this.selectStartMs);
     window.addEventListener('mouseup', this.onBgUp);
     window.addEventListener('mousemove', this.onBgMove);
-    this.pause();
   };
 
-  onBgMove = (e) => {
-    // const { Global } = this.props;
-    const { bgWaveRef } = this.domRefs;
-    if (!this.isDrawing || !bgWaveRef.current) return;
-    const rect = bgWaveRef.current.getBoundingClientRect();
+  onBgMove = (e: MouseEvent) => {
+    const { bgWaveRef, contextMenuRef } = this.domRefs;
+    const { x } = this.getRealPos(e);
+    if (this.EventClock !== 'onBgDown' || !bgWaveRef.current || !this.isDrawing) return;
+    contextMenuRef.current && (contextMenuRef.current.style.display = 'none');
 
-    const posLeftPx = e.clientX - rect.left;
-    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
-    this.selectEndMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posLeftPx, this.state.zoom) + mainHasMovedMs;
-    const isInSelectArea = this.signAll.find(({ isVisible, startTime, endTime }) => isVisible && startTime <= this.selectEndMs && this.selectEndMs <= endTime);
-    if (isInSelectArea) {
-      this.isManual = isInSelectArea.isManual;
-      this.drawMultiSelectArea();
-      this.drawTimeLine(posLeftPx, false);
-      this.selectStartMs = this.selectEndMs;
+    const rect = bgWaveRef.current.getBoundingClientRect();
+    const { moveMs } = this.getDirection(e);
+
+    bgWaveRef.current.style.cursor = 'pointer';
+    // 鼠标是否超出图谱
+    if (e.clientX < rect.left || e.clientX > rect.right - 1) {
+      PlayBarTimer && clearInterval(PlayBarTimer);
+      const speed = e.clientX < rect.left ? -10 : 10;
+
+      this.scanStartX = 0;
+      PlayBarTimer = setInterval(() => {
+        this.onSliderMove(speed, 'onSliderDown');
+        if (this.selectTimeLine === 'M') {
+          this.selectStartMs = this.selectEndMs = moveMs;
+          this.drawTimeLine(x);
+          return;
+        } else {
+          this.moveSelect(x, e, rect);
+        }
+      }, 200);
+      return;
     } else {
-      this.isManual = true;
-      this.signAll.forEach((k) => (k.isVisible = false));
-      this.drawSelectArea(this.selectStartMs, this.selectEndMs, this.isManual);
+      clearInterval(PlayBarTimer);
+      // 移动播放条, 否则移动选区
+      if (this.selectTimeLine === 'M') {
+        this.selectStartMs = this.selectEndMs = moveMs;
+        this.drawTimeLine(x);
+        return;
+      } else {
+        this.moveSelect(x, e, rect);
+      }
     }
   };
+  /** 移动时间线选择 */
+  moveSelect(x: number, e: MouseEvent, rect: DOMRect) {
+    // 1.区域内部移动
+    if (e.clientX >= rect.left && e.clientX <= rect.right) {
+      const moveMs = this.getNewPxStartMs(x);
+      if (this.InTimeLine) {
+        if (this.selectTimeLine === 'L') {
+          this.selectStartMs = moveMs;
+        } else if (this.selectTimeLine === 'R') {
+          this.selectEndMs = moveMs;
+        }
+      } else {
+        this.selectEndMs = moveMs;
+      }
+    } else {
+      // 2.超出左右边界处理
+      if (e.clientX < rect.left) {
+        if (this.selectTimeLine) {
+          if (this.selectTimeLine === 'L') {
+            this.selectStartMs = this.xAxisStartMs;
+          } else if (this.selectTimeLine === 'R') {
+            this.selectEndMs = this.xAxisStartMs;
+          }
+        } else {
+          this.selectEndMs = this.xAxisStartMs;
+        }
+      } else if (e.clientX > rect.right) {
+        const waveMaxMs = this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth;
+        if (this.selectTimeLine) {
+          if (this.selectTimeLine === 'L') {
+            this.selectStartMs = waveMaxMs;
+          } else if (this.selectTimeLine === 'R') {
+            this.selectEndMs = waveMaxMs;
+          }
+        } else {
+          this.selectEndMs = waveMaxMs;
+        }
+      }
+    }
+
+    this.isManual = true;
+    this.signAll.forEach((k) => (k.isVisible = false));
+    this.drawSelectArea(this.selectStartMs, this.selectEndMs, this.isManual);
+  }
 
   onBgUp = (e) => {
-    const { Global } = this.props;
+    if (this.EventClock !== 'onBgDown') return;
+    const { Global, onSelectAreaChange = noop } = this.props;
     const { bgWaveRef } = this.domRefs;
     if (!bgWaveRef.current) return;
-    const rect = bgWaveRef.current.getBoundingClientRect();
-    this.onBgMove(e);
     this.isDrawing = false;
+    PlayBarTimer && clearInterval(PlayBarTimer);
+    window.removeEventListener('mouseup', this.onBgUp);
+    window.removeEventListener('mousemove', this.onBgMove);
+
+    // 鼠标抬起, 时间线未移动
+    if (this.selectStartMs === this.selectEndMs) {
+      const { x } = this.getRealPos(e);
+      const isInSelectArea = this.signAll.find(
+        ({ isVisible, startTime, endTime }) => isVisible && startTime <= this.selectEndMs && this.selectEndMs <= endTime
+      );
+      if (isInSelectArea) {
+        this.isManual = isInSelectArea.isManual;
+        this.drawMultiSelectArea();
+        this.drawTimeLine(x, false);
+      } else {
+        this.signAll.forEach((k) => (k.isVisible = false));
+        this.drawSelectArea(this.selectStartMs, this.selectEndMs, this.isManual);
+        this.drawTimeLine(x);
+      }
+      if (this.InTimeLine) {
+        this.pause(this.selectStartMs); // 处理播放时间线拖动时, 更新视频进度条
+      }
+    }
+
     if (this.selectStartMs > this.selectEndMs) {
       const temMs = this.selectStartMs;
       this.selectStartMs = this.selectEndMs;
       this.selectEndMs = temMs;
     }
-
-    // 鼠标选区移出左边和右边的边界处理
-    if (e.clientX <= rect.left) {
-      this.selectStartMs = this.xAxisStartMs;
-    } else if (e.clientX >= rect.right) {
-      this.selectEndMs = this.xAxisStartMs + this.actualPerPxMeamMs * this.mainWaveWidth;
-    }
-
     this.selectStartMs = Math.ceil(this.selectStartMs);
     this.selectEndMs = Math.ceil(this.selectEndMs);
 
+    this.setState({ playCurrentTime: this.selectStartMs });
+    onSelectAreaChange(this.selectStartMs, this.selectEndMs);
     Global.setTotalMs(this.totalMs);
     Global.setRegion({ ...Global.region, begin_time: this.selectStartMs, end_time: this.selectEndMs });
-    if (this.props.onSelectAreaChange) {
-      this.props.onSelectAreaChange(this.selectStartMs, this.selectEndMs);
-    }
-    window.removeEventListener('mouseup', this.onBgUp);
-    window.removeEventListener('mousemove', this.onBgMove);
   };
 
   onZoomRatioChange(value) {
@@ -839,12 +1075,14 @@ class Wave extends Component<TProps, TState> {
 
   zoomChange = utils.throttle((type: 'zoomIn' | 'zoomOut', nowZoom?: number) => {
     if (!this.state.isValidFile) return;
+    const { onZoomChange } = this.props;
     const { zoom } = this.state;
     const changeZoom = type === 'zoomIn' ? waveConfig.zoomStep : -waveConfig.zoomStep;
     nowZoom = nowZoom ? nowZoom : zoom + changeZoom;
     if (nowZoom < 100) nowZoom = 100;
     if (zoom === 100 && zoom === nowZoom) return;
 
+    onZoomChange && onZoomChange(nowZoom);
     this.setState({ zoom: nowZoom, zoomRatio: `${nowZoom}%` }, () => {
       this.getWaveHead();
       this.mainCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
@@ -867,8 +1105,7 @@ class Wave extends Component<TProps, TState> {
     this.isManual = isManual;
     const rect = e.target.getBoundingClientRect();
     const posPx = e.clientX - rect.left;
-    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
-    const posMs = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posPx, this.state.zoom) + mainHasMovedMs;
+    const posMs = this.getNewPxStartMs(posPx);
     this.selectStartMs = 0;
     this.selectEndMs = 0;
     this.signAll.forEach((item) => {
@@ -930,19 +1167,19 @@ class Wave extends Component<TProps, TState> {
   addSign = (signItem: SignProps) => {
     const hasSameName = this.signAll.some((k) => k.name === signItem.name);
     if (hasSameName) {
-      message.error({ content: t('common:repeatSignName'), duration: 1 });
+      message.error({ content: '标注名称重复', duration: 1 });
       return false;
     }
     const hasSameTimeArea = (isManual) => {
       return this.signAll.some((k) => {
-        if (k.isManual === isManual && k.startTime <= signItem.startTime && signItem.startTime <= k.endTime) {
+        if (k.isManual === isManual && k.startTime <= signItem.startTime && signItem.endTime <= k.endTime) {
           return true;
         }
         return false;
       });
     };
     if (hasSameTimeArea(true)) {
-      message.error({ content: t('common:hasSigned'), duration: 1 });
+      message.error({ content: '该时间段已经添加过标注！', duration: 1 });
       return false;
     }
     signItem.id = uuidv4();
@@ -952,7 +1189,7 @@ class Wave extends Component<TProps, TState> {
     this.drawSign();
     const manualSigns = this.signAll.filter((item) => item.isManual === true);
     this.setState({ manualSigns });
-    message.success({ content: t('common:addSignSucc'), duration: 1 });
+    message.success({ content: '添加标注成功', duration: 1 });
     return true;
   };
 
@@ -960,7 +1197,7 @@ class Wave extends Component<TProps, TState> {
   editSign = (signItem: SignProps) => {
     const hasSameName = this.signAll.some((k) => k.isManual === signItem.isManual && k.name === signItem.name);
     if (hasSameName) {
-      message.error({ content: t('common:repeatSignName'), duration: 1 });
+      message.error({ content: '标注名称重复', duration: 1 });
       return false;
     }
     const idx = this.signAll.findIndex((k) => k.id === signItem.id);
@@ -970,7 +1207,7 @@ class Wave extends Component<TProps, TState> {
       this.setState({ manualSigns });
     }
     this.drawSign();
-    message.success({ content: t('common:editSignSucc'), duration: 1 });
+    message.success({ content: '编辑标注成功', duration: 1 });
     return true;
   };
 
@@ -988,7 +1225,7 @@ class Wave extends Component<TProps, TState> {
   onAddSign = () => {
     const { onClickAddSign = noop } = this.props;
     if ((!this.selectStartMs && !this.selectEndMs) || this.selectEndMs === this.selectStartMs) {
-      message.error(t('common:signPla'));
+      message.error('请选择标注区域！');
       return;
     }
     onClickAddSign();
@@ -1004,6 +1241,7 @@ class Wave extends Component<TProps, TState> {
   onSliderDown = (e) => {
     const { scanSliderRef } = this.domRefs;
     if (!scanSliderRef.current) return;
+    this.EventClock = 'onSliderDown';
     const rect = e.target.getBoundingClientRect();
     this.scanStartX = e.clientX - rect.left;
     scanSliderRef.current.style.cursor = '-webkit-grab';
@@ -1011,7 +1249,8 @@ class Wave extends Component<TProps, TState> {
     window.addEventListener('mousemove', this.onSliderMove);
   };
 
-  onSliderMove = (e) => {
+  onSliderMove = (e, type?) => {
+    if ((type || this.EventClock) !== 'onSliderDown') return;
     const { scanSliderRef } = this.domRefs;
     if (!scanSliderRef.current) return;
     const scanRect = scanSliderRef.current.getBoundingClientRect();
@@ -1053,6 +1292,16 @@ class Wave extends Component<TProps, TState> {
     }
   };
 
+  onSliderUp = (e) => {
+    const { scanSliderRef } = this.domRefs;
+    if (!scanSliderRef.current) return;
+    if (this.EventClock !== 'onSliderDown') return;
+    scanSliderRef.current.style.cursor = 'default';
+    window.removeEventListener('mouseup', this.onSliderUp);
+    window.removeEventListener('mousemove', this.onSliderMove);
+    this.prevScanStartX = this.currentScanStartX;
+  };
+
   /** 下一次重绘更新图谱 */
   updateMainWave = utils.throttle((startMs) => {
     requestAnimationFrame(() => {
@@ -1060,20 +1309,10 @@ class Wave extends Component<TProps, TState> {
     });
   }, 200);
 
-  onSliderUp = (e) => {
-    const { scanSliderRef } = this.domRefs;
-    if (!scanSliderRef.current) return;
-    scanSliderRef.current.style.cursor = 'default';
-    window.removeEventListener('mouseup', this.onSliderUp);
-    window.removeEventListener('mousemove', this.onSliderMove);
-    this.prevScanStartX = this.currentScanStartX;
-  };
-
   signDoubleClick = (e, isManual = true) => {
     const rect = e.target.getBoundingClientRect();
     const posPx = e.clientX - rect.left;
-    const mainHasMovedMs = this.getMainHasMovedX() * this.actualPerPxMeamMs;
-    const activeTime = waveUtil.pxToMs(this.totalMs, this.mainWaveWidth, posPx, this.state.zoom) + mainHasMovedMs;
+    const activeTime = this.getNewPxStartMs(posPx);
     const { onDoubleClickSign = noop, onDoubleClickSmartSign = noop } = this.props;
     this.signAll.forEach((item) => {
       if (activeTime && item.startTime <= activeTime && activeTime <= item.endTime) {
@@ -1132,30 +1371,16 @@ class Wave extends Component<TProps, TState> {
   waveAction = utils.debounce((receiveParams) => {
     console.log('receiveParams', receiveParams);
     const { type, name = 'test', activeFileId } = receiveParams;
-    const { Global, fileId } = this.props;
+    const { Global, fileId, onSelectAreaChange = noop } = this.props;
     const { copyByteSizeLimit } = waveConfig;
     const positon = this.selectStartMs;
     const size = this.selectEndMs - this.selectStartMs;
     const selectByteSize = (size / this.totalMs) * this.pcmSize;
     if (selectByteSize > copyByteSizeLimit) {
-      message.warning(t('common:editAreaLimit'));
+      message.warning('操作区域太大');
       return;
     }
     switch (type) {
-      case 'wave_all': {
-        this.selectStartMs = 0;
-        this.selectEndMs = this.totalMs;
-        this.drawSelectArea(0, this.totalMs, true, true);
-        Global.setRegion({ begin_time: 0, end_time: this.totalMs });
-        break;
-      }
-      // case 'wave_all_no': {
-      //   this.selectStartMs = 0;
-      //   this.selectEndMs = 0;
-      //   this.drawSelectArea(0, 0, true);
-      //   Global.setRegion({ begin_time: 0, end_time: 0 });
-      //   break;
-      // }
       case 'wave_space': {
         const { playCurrentTime, playing } = this.state;
         if (playing) {
@@ -1182,6 +1407,7 @@ class Wave extends Component<TProps, TState> {
             this.selectEndMs = this.selectStartMs;
             this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
+          this.onEditWaveGraph();
         });
         break;
       }
@@ -1189,7 +1415,7 @@ class Wave extends Component<TProps, TState> {
         if (!size) return;
         const copyData: Buffer | Uint8Array = waveGraph.getData(this.waveId, this.selectStartMs, this.selectEndMs);
         Global.setCacheWaveData({ orignFileId: fileId, orignWaveId: this.waveId, originBufMs: size, orignCutBuf: copyData });
-        message.success(t('common:copySucc'));
+        message.success('复制成功');
         break;
       }
       case 'wave_paste': {
@@ -1205,9 +1431,9 @@ class Wave extends Component<TProps, TState> {
             this.setState({ hasEdit: true });
             this.updateWave();
             this.onAddAreas(positon, copyBufMs);
-            this.drawSelectArea(positon, positon + copyBufMs, true);
-            // Global.setCacheWaveData({});
+            this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
+          this.onEditWaveGraph();
         });
         break;
       }
@@ -1220,7 +1446,10 @@ class Wave extends Component<TProps, TState> {
             this.setState({ hasEdit: true });
             this.updateWave();
             Global.setCacheWaveData({});
+            this.onDeleteAreas(this.selectStartMs, this.selectEndMs);
+            this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
+          this.onEditWaveGraph();
         });
         break;
       }
@@ -1237,16 +1466,18 @@ class Wave extends Component<TProps, TState> {
             this.selectEndMs = this.selectStartMs;
             this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
           }
+          this.onEditWaveGraph();
         });
         break;
       }
       case 'wave_save': {
         if (!this.state.hasEdit) {
-          message.warning(t('common:noNeedSave'));
+          message.warning('无需保存');
           return;
         }
         const tempFilePath = path.join(Reflect.get($$, 'tempFiles'), `${Date.now()}.wav`);
         this.setState({ mainLoading: true });
+
         waveGraph.saveEdit(this.waveId, tempFilePath, (res) => {
           if (res) {
             PubSub.publish(AppEventNames.REFRESH_UPLOAD_LIST, { filePaths: [tempFilePath] });
@@ -1263,7 +1494,6 @@ class Wave extends Component<TProps, TState> {
             this.reDraw();
             this.updateWave();
             Global.setCacheWaveData({});
-
             /** 1.获取最近一次操作记录 */
             const { deleteSigns, startTime, endTime, changeTimeIds, editType } = this.operationRecord.pop() as DeleteSignsType;
             /** 2.标记恢复 */
@@ -1285,26 +1515,32 @@ class Wave extends Component<TProps, TState> {
             });
             this.drawSign();
           }
+          this.onEditWaveGraph();
         });
         break;
       }
-      case 'wave_right': {
-        this.scanStartX = 0;
-        this.onSliderMove(10);
+      case 'select_all': {
+        this.selectStartMs = 0;
+        this.selectEndMs = Math.floor(this.totalMs);
+        Global.setTotalMs(this.totalMs);
+        Global.setRegion({ begin_time: 0, end_time: this.totalMs });
+        this.drawSelectArea(0, this.selectEndMs, true, true);
+        onSelectAreaChange(0, this.selectEndMs);
         break;
       }
-      case 'wave_left': {
-        this.scanStartX = 0;
-        this.onSliderMove(-10);
+      case 'cancel_select_all': {
+        this.selectStartMs = 0;
+        this.selectEndMs = 0;
+        this.drawSelectArea(this.selectStartMs, this.selectEndMs, true);
+        Global.setRegion({ begin_time: 0, end_time: 0 });
         break;
       }
-
-      case 'wave_addSign': {
+      case 'addSign': {
         const addSignParams = { startTime: this.selectStartMs, isManual: true, endTime: this.selectEndMs, name };
         this.addSign(addSignParams);
         break;
       }
-      case 'wave_editSign': {
+      case 'editSign': {
         this.editSign(receiveParams);
         break;
       }
@@ -1312,11 +1548,27 @@ class Wave extends Component<TProps, TState> {
         this.deleteSign(activeFileId);
         break;
       }
-
+      case 'wave_right': {
+        this.scanStartX = 0;
+        this.EventClock = 'onSliderDown';
+        this.onSliderMove(10);
+        break;
+      }
+      case 'wave_left': {
+        this.scanStartX = 0;
+        this.EventClock = 'onSliderDown';
+        this.onSliderMove(-10);
+        break;
+      }
       default:
         break;
     }
   }, 30);
+
+  /** 音频编辑时发送waveId给视频,获取是否编辑 */
+  onEditWaveGraph() {
+    PubSub.publish(AppEventNames.WAVE_IS_EDIT, { waveId: this.waveId });
+  }
 
   /** 更新音频buffer */
   updateWave = () => {
@@ -1417,8 +1669,32 @@ class Wave extends Component<TProps, TState> {
   //   console.log(' inputPath, outPath', inputPath, outPath);
   // }
 
+  onClickCurrentWave() {
+    shortcutKeyDefaultList.forEach((s) => Mousetrap.unbind(s.key));
+    shortcutKeyDefaultList.forEach((s) => {
+      Mousetrap.bind(s.key, (e: KeyboardEvent) => {
+        e.preventDefault();
+        this.waveAction({ type: s.type });
+      });
+    });
+  }
+
+  onControlVideo(type: VIDEO_STATUS, params) {
+    const { currentTime, speed } = params;
+    PubSub.publish(AppEventNames.CONTROL_VIDEO, { type, currentTime, speed, waveFileId: this.props.fileId });
+  }
+  onClickContextMenuItem(menu, e) {
+    e.preventDefault();
+    if (menu.type === 'addSign') {
+      this.onAddSign();
+    } else {
+      this.waveAction({ type: menu.type });
+    }
+  }
+
   render() {
-    const { scanWaveRef, bgWaveRef, mainWaveRef, clientRef, xAxisRef, yAxisRef, scanSliderRef, signRef, smartSignRef } = this.domRefs;
+    const { scanWaveRef, bgWaveRef, mainWaveRef, clientRef, xAxisRef, yAxisRef, scanSliderRef, signRef, smartSignRef, signAreaRef, contextMenuRef } =
+      this.domRefs;
     const {
       playing,
       playCurrentTime,
@@ -1433,25 +1709,22 @@ class Wave extends Component<TProps, TState> {
       zoomRatio
     } = this.state;
     const {
+      fileId,
       onDoubleClickSign,
       showAddBtn = true,
       showSmartSign = true,
       showManualSign = true,
       showSelectArea = true,
       smartSignTitle,
-      isSearchVoiceSign
+      isSearchVoiceSign,
+      contextMenuList
     } = this.props;
+
+    const smartSignList = this.signAll.filter((item) => !item.isManual);
+    const manualSignList = this.signAll.filter((item) => item.isManual);
+
     return isValidFile ? (
-      <div
-        className="wave"
-        onClick={() => {
-          Mousetrap.unbind('space');
-          Mousetrap.bind('space', (e: KeyboardEvent) => {
-            e.preventDefault();
-            this.waveAction({ type: 'wave_space' });
-          });
-        }}
-      >
+      <div className="wave" onClick={this.onClickCurrentWave.bind(this)}>
         <Button onClick={this.voiceHandler.bind(this)} type="primary" style={{ width: 50 }}>
           保存
         </Button>
@@ -1467,106 +1740,117 @@ class Wave extends Component<TProps, TState> {
               </div>
 
               <div className="wave-content flex" ref={clientRef}>
-                <div>
-                  <canvas className="wave-content-bg ui-h-100" ref={bgWaveRef} onWheel={this.onWheel} onMouseDown={this.onBgDown} />
-                  {/* <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}></Spin> */}
-                  <canvas className="ui-h-100 flex-1" ref={mainWaveRef} style={{ cursor: 'text' }} />
+                <canvas
+                  className="wave-content-bg ui-h-100"
+                  ref={bgWaveRef}
+                  id={`bg_wave_${fileId}`}
+                  onWheel={this.onWheel}
+                  onMouseDown={this.onBgDown}
+                  onMouseMove={this.onMainMouseMove}
+                />
+                {/* <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}></Spin> */}
+                <canvas className="ui-h-100 flex-1" ref={mainWaveRef} style={{ cursor: 'text' }} />
+                <div className="wave-context_menu" ref={contextMenuRef}>
+                  {contextMenuList?.map((menu) => (
+                    <div key={menu.key} className="wave-context_menu-item" onClick={this.onClickContextMenuItem.bind(this, menu)}>
+                      {menu.name} {menu.code}
+                    </div>
+                  ))}
                 </div>
-                <canvas className="wave-xAxis" ref={xAxisRef}></canvas>
               </div>
             </div>
           </div>
+        </div>
 
+        <div className="wave-bottom" ref={signAreaRef}>
+          <canvas className="wave-xAxis" ref={xAxisRef}></canvas>
           <div className="sign-area">
             {/* 智能标注 */}
-            {showSmartSign ? (
-              <div style={{ position: 'relative', height: showSmartSign ? '32px' : 0 }}>
-                <canvas
-                  ref={smartSignRef}
-                  className="sign-area-bg"
-                  style={{ cursor: 'text' }}
-                  title={t('common:lookMore')}
-                  onClick={(e) => this.signClick(e, false)}
-                  onDoubleClick={(e) => this.signDoubleClick(e, false)}
-                />
-                <div className="sign-img-contain">
-                  {smartSignTitle ? (
-                    <span>{smartSignTitle}</span>
-                  ) : (
-                    <>
-                      {t('common:autoSign')}
-                      <img src={atlas_label} className="smart_img" title={t('common:autoSign')} alt={t('common:autoSign')} />
-                    </>
-                  )}
-                </div>
-                <Popover
-                  trigger="click"
-                  placement="left"
-                  overlayClassName="sign_modal"
-                  visible={smartSignListVisible}
-                  getPopupContainer={() => document.querySelector('.wave-bottom') as HTMLElement}
-                  onVisibleChange={(visible) => this.setState({ smartSignListVisible: visible })}
-                  title={
-                    <div className="flex just-between">
-                      <div>{`${t('common:sign')}（${this.signAll?.length}）`}</div>
-                      <div
-                        className="cursor fz20"
-                        title={t('common:close')}
-                        style={{ lineHeight: '14px' }}
-                        onClick={() => this.setState({ smartSignListVisible: false })}
-                      >
-                        ×
-                      </div>
-                    </div>
-                  }
-                  content={() => <SignTable isSearchVoiceSign={isSearchVoiceSign} dataSource={this.signAll.filter((item) => !item.isManual)} />}
-                >
-                  <img
-                    src={smartSignListVisible ? more_signclose : more_signopen}
-                    className="sign_collapsed"
-                    title={smartSignListVisible ? t('common:hideSignList') : t('common:showSignList')}
-                    alt={t('common:sign')}
-                    onClick={() => {
-                      this.setState({ manualSignListVisible: false });
-                      this.setState({ smartSignListVisible: !smartSignListVisible });
-                    }}
-                  />
-                </Popover>
-                <img
-                  src={smartSignVisible ? atlas_eyesopen : atlas_eyesclose}
-                  className="visible_img"
-                  title={smartSignVisible ? t('common:showAutoSign') : t('common:hideAutoSign')}
-                  alt={t('common:hide')}
-                  onClick={this.toggleSmartSign}
-                />
-                <div className="border" />
+            <div style={{ position: 'relative', display: showSmartSign ? 'block' : 'none', height: 28 }}>
+              <canvas
+                ref={smartSignRef}
+                className="sign-area-bg"
+                title="双击标注可查看更多详情"
+                onClick={(e) => this.signClick(e, false)}
+                onDoubleClick={(e) => this.signDoubleClick(e, false)}
+              />
+              <div className="sign-img-contain">
+                {smartSignTitle ? (
+                  <span>{smartSignTitle}</span>
+                ) : (
+                  <>
+                    智能标注
+                    <img src={atlas_label} className="smart_img" title="智能标注" alt="智能标注" />
+                  </>
+                )}
               </div>
-            ) : null}
+              <Popover
+                trigger="click"
+                placement="leftBottom"
+                overlayClassName="sign_modal"
+                visible={smartSignListVisible}
+                onVisibleChange={(visible) => this.setState({ smartSignListVisible: visible })}
+                // getPopupContainer={() => signAreaRef.current as HTMLElement}
+                title={
+                  <div className="sign-scroll-event flex just-between">
+                    <div className="sign-scroll-event">标注{`（${smartSignList?.length}）`}</div>
+                    <div
+                      className="sign-scroll-event cursor fz20"
+                      title="关闭"
+                      style={{ lineHeight: '14px' }}
+                      onClick={() => this.setState({ smartSignListVisible: false })}
+                    >
+                      ×
+                    </div>
+                  </div>
+                }
+                content={() => <SignTable isSearchVoiceSign={isSearchVoiceSign} dataSource={smartSignList} />}
+              >
+                <img
+                  src={smartSignListVisible ? more_signclose : more_signopen}
+                  className="sign_collapsed"
+                  title={smartSignListVisible ? '隐藏标注列表' : '显示标注列表'}
+                  alt="标注"
+                  onClick={() => {
+                    this.setState({ manualSignListVisible: false });
+                    this.setState({ smartSignListVisible: !smartSignListVisible });
+                  }}
+                />
+              </Popover>
+              <img
+                src={smartSignVisible ? atlas_eyesopen : atlas_eyesclose}
+                className="visible_img"
+                title={smartSignVisible ? '显示智能标注' : '隐藏智能标注'}
+                alt="隐藏"
+                onClick={this.toggleSmartSign}
+              />
+              <div className="border" />
+            </div>
 
             {/* 手动标注 */}
-            <div style={{ position: 'relative', display: showManualSign ? 'block' : 'none', height: showManualSign ? '32px' : 0 }}>
+            <div style={{ position: 'relative', display: showManualSign ? 'block' : 'none', height: 28 }}>
               <canvas onDoubleClick={this.signDoubleClick} onClick={this.signClick} className="sign-area-bg shou" ref={signRef} />
               <img
                 src={signVisible ? atlas_eyesopen : atlas_eyesclose}
                 className="visible_img"
-                title={signVisible ? t('common:show') : t('common:hide')}
-                alt={t('common:hide')}
+                title={signVisible ? '显示' : '隐藏'}
+                alt="隐藏"
                 onClick={this.toggleSign}
               />
               <Popover
                 trigger="click"
-                placement="left"
+                placement="leftBottom"
                 style={{ zIndex: 2 }}
                 overlayClassName="sign_modal"
                 visible={manualSignListVisible}
                 onVisibleChange={(visible) => this.setState({ manualSignListVisible: this.props.Global?.showSignEdit || visible })}
-                getPopupContainer={(node) => document.querySelector('.wave-bottom') as HTMLElement}
+                // getPopupContainer={() => signAreaRef.current as HTMLElement}
                 title={
-                  <div className="flex just-between">
-                    <div>{`${t('common:sign')}（${manualSigns?.length}）`}</div>
+                  <div className="sign-scroll-event flex just-between">
+                    <div className="sign-scroll-event">{'标注' + `（${manualSignList?.length}）`}</div>
                     <div
-                      className="cursor fz20"
-                      title={t('common:close')}
+                      className="sign-scroll-event cursor fz20"
+                      title="关闭"
                       style={{ lineHeight: '14px' }}
                       onClick={() => this.setState({ manualSignListVisible: false })}
                     >
@@ -1574,13 +1858,13 @@ class Wave extends Component<TProps, TState> {
                     </div>
                   </div>
                 }
-                content={() => <SignTable dataSource={[...manualSigns]} onEditSign={onDoubleClickSign} />}
+                content={() => <SignTable dataSource={manualSignList} onEditSign={onDoubleClickSign} />}
               >
                 <img
                   src={manualSignListVisible ? more_signclose : more_signopen}
                   className="sign_collapsed"
-                  title={manualSignListVisible ? t('common:hideSignList') : t('common:showSignList')}
-                  alt="标记"
+                  title={manualSignListVisible ? '隐藏标注列表' : '显示标注列表'}
+                  alt="标注"
                   onClick={() => {
                     this.setState({ smartSignListVisible: false });
                     this.setState({ manualSignListVisible: !manualSignListVisible });
@@ -1589,39 +1873,35 @@ class Wave extends Component<TProps, TState> {
               </Popover>
             </div>
           </div>
-        </div>
-
-        <div className="wave-bottom">
           <div className="play-area">
             <span className="current-time ellipsis">
               {/* {waveUtil.secondsToMinutes(playCurrentTime)} */}
               {showSelectArea ? (
                 <span className="mr20">
-                  {t('common:selectArea')}&nbsp;
+                  <span className="label-colon">选区</span>
                   {utils.toHHmmss(this.selectStartMs)}-{utils.toHHmmss(this.selectEndMs)}
                 </span>
               ) : null}
               <span>
-                {t('common:time')}&nbsp;
+                <span className="label-colon">时长</span>
                 {utils.toHHmmss(this.totalMs)}
               </span>
             </span>
-            <div className="play-action word-nowrap">
+            <div className="word-nowrap flex">
               {playing ? (
-                <img src={atlas_stop} className="operate_img" title={t('common:pause')} alt={t('common:pause')} onClick={() => this.pause(playCurrentTime)} />
+                <img src={atlas_stop} className="operate_img" title="暂停" alt="暂停" onClick={() => this.pause(playCurrentTime)} />
               ) : (
-                <img src={atlas_play} className="operate_img" title={t('common:play')} alt={t('common:play')} onClick={() => this.play()} />
+                <img src={atlas_play} className="operate_img" title="播放" alt="播放" onClick={() => this.play()} />
               )}
-              {showAddBtn ? (
-                <img src={atlas_sign} className="operate_img ui-ml-10" title={t('common:addSign')} alt={t('common:addSign')} onClick={this.onAddSign} />
-              ) : null}
-              <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-block' }}>
+              {showAddBtn ? <img src={atlas_sign} className="operate_img ui-ml-10" title="新增标注" alt="新增标注" onClick={this.onAddSign} /> : null}
+
+              <div onClick={(e) => e.stopPropagation()} className="flex">
                 <Popover
                   trigger="focus"
                   visible={this.state.playbackRateVisible}
                   overlayClassName="playbackRates"
-                  getPopupContainer={(node) => node.parentNode as HTMLElement}
                   onVisibleChange={(visible) => this.setState({ playbackRateVisible: visible })}
+                  // getPopupContainer={(node) => node.parentNode as HTMLElement}
                   content={
                     <div>
                       {waveConfig.playbackRates.map((item) => {
@@ -1634,6 +1914,7 @@ class Wave extends Component<TProps, TState> {
                               e.stopPropagation();
                               this.audio.playbackRate = item.value;
                               this.setState({ playbackRate: item, playbackRateVisible: false });
+                              this.onControlVideo(VIDEO_STATUS.speed, { speed: item.value });
                               return;
                             }}
                           >
@@ -1787,6 +2068,29 @@ class Wave extends Component<TProps, TState> {
               margin-left: 5px;
               width: 14px;
               height: 14px;
+            }
+
+            .wave-context_menu {
+              background: #081b3a;
+              display: none;
+              z-index: 888;
+              position: fixed;
+              top: 755px;
+              left: 553px;
+              border: 1px solid #009ee9;
+            }
+            .wave-context_menu .wave-context_menu-item {
+              color: #fff;
+              cursor: pointer;
+              padding: 2px 10px;
+              border-bottom: 1px solid rgba(0, 158, 233, 0.3);
+            }
+            .wave-context_menu .wave-context_menu-item:last-child {
+              border-bottom: none;
+            }
+            .wave-context_menu .wave-context_menu-item:hover {
+              color: #009ee9;
+              background: #1e366a;
             }
           `}
         </style>

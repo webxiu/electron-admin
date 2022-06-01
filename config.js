@@ -59,18 +59,21 @@ module.exports = {
   hotUpdaterUri: 'http://118.24.173.102:10160',
 
   /** 多语言配置 与src/Render/routes/i18n.ts中resources配置的语言数目一致 */
-  languages: {
+  appConfig: {
     zh_CN: {
       //中文:打包名称
       appName: '海阔天空',
-      //中文:打包语言
-      appLang: 'zh-CN',
+      //中文:安装语言
+      sysLang: 'zh-CN',
+      //中文:页面语言
+      appLang: 'zh_CN',
       //中文:打包图标
       appIcon: 'public/assets/favicon/png/favicon_ch@5x.png'
     },
     en: {
       appName: 'Sea And Sky',
-      appLang: 'en-US',
+      sysLang: 'en-US',
+      appLang: 'en',
       appIcon: 'public/assets/favicon/png/favicon_en@5x.png'
     }
   }

@@ -50,6 +50,7 @@ const wakeOrCreate = () => {
   app.on('ready', function () {
     require('./DataBase/index');
     require('./Application');
+    console.log('======================>app', app.getLocale());
   });
 
   let rootPath = path.join(__dirname, '../'); // 根目录
