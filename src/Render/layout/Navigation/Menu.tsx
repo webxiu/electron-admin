@@ -1,52 +1,40 @@
-import React, { useEffect } from 'react';
+import {
+  AppstoreOutlined,
+  ContainerOutlined,
+  DesktopOutlined,
+  MailOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PieChartOutlined,
+  SettingOutlined
+} from '@ant-design/icons';
+import { Button, Menu } from 'antd';
+import type { MenuItemProps, MenuProps } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router';
 
-import { menuList } from '@/Render/config/index';
+import { menuItems } from '@/Render/config/menu.config';
 import { useObserver } from 'mobx-react';
+
+type MenuItem = Required<MenuProps>['items'][number];
 
 interface Props {}
 
-export const Header: React.FC<Props> = (props) => {
+export const Wrap: React.FC<Props> = (props) => {
   const history = useHistory();
   const location = useLocation();
 
   useEffect(() => {}, []);
 
   return useObserver(() => (
-    <>
-      <div className="sidebar flex-col align-center">
-        {menuList.map((item) => (
-          <div
-            className={`sidebar-item${item.path === location.pathname ? ' active' : ''}`}
-            title={item.title}
-            key={item.key}
-            onClick={() => history.push(item.path)}
-          >
-            <img width="100%" height="100%" src={item.path === location.pathname ? item.icon_on : item.icon} alt="" />
-          </div>
-        ))}
+    <div className="flex-col ui-h-100">
+      <div className="flex-1">
+        <Menu defaultSelectedKeys={['1']} theme="light" defaultOpenKeys={['sub1']} mode="inline" items={menuItems} />
       </div>
-      <style jsx>{`
-        .sidebar {
-          width: 56px;
-          background: var(--menuColor);
-          margin: 5px 10px;
-        }
-        .sidebar-item {
-          margin-top: 22px;
-          width: 32px;
-          height: 32px;
-          border-radius: 5px;
-          padding: 4px;
-          cursor: pointer;
-        }
-        .sidebar-item.active,
-        .sidebar-item:hover {
-          background: #929297;
-        }
-      `}</style>
-    </>
+
+      <style jsx>{``}</style>
+    </div>
   ));
 };
 
-export default Header;
+export default Wrap;

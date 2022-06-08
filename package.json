@@ -22,7 +22,7 @@
     "@ant-design/icons": "~4.3.0",
     "@babel/parser": "^7.17.9",
     "@babel/traverse": "^7.17.9",
-    "antd": "^4.17.3",
+    "antd": "^4.21.0",
     "axios": "~0.21.0",
     "babel-polyfill": "~6.26.0",
     "copy-to-clipboard": "^3.3.1",

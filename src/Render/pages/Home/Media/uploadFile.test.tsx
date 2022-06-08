@@ -315,7 +315,6 @@ const Media = () => {
           margin: 0 5px;
           font-family: PingFangSC-Medium;
           position: relative;
-          color: #fff;
         }
         .status-text {
           margin-right: 14px;

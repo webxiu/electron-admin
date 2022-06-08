@@ -93,7 +93,7 @@ export const Header: React.FC<Props> = (props) => {
           position: relative;
           height: 52px;
           overflow: hidden;
-          background: #404040;
+          background: var(--headColor);
         }
         .control-group {
           display: flex;

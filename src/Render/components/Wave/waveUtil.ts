@@ -107,5 +107,16 @@ export default {
       }
     }
     return arr[index];
+  },
+  /** Canvas文本超出省略 */
+  setTextEllipsis(ctx: CanvasRenderingContext2D, text: string, areaWidth: number, dotWith = 8) {
+    const textWidth = ctx.measureText(text).width;
+    const textTotalWidth = textWidth + dotWith;
+    if (textTotalWidth > areaWidth) {
+      const widthPerFont = textTotalWidth / text.length + 1; // 每个字的width, 省略号算一个字
+      const tLen = areaWidth / widthPerFont; // 最多显示几个字
+      text = text.slice(0, tLen) + '...';
+    }
+    return text;
   }
 };

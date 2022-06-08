@@ -1,3 +1,5 @@
+import './index.less';
+
 import React, { useEffect, useState } from 'react';
 
 import { Button } from 'antd';
@@ -66,7 +68,16 @@ const Wrap: React.FC = () => {
         <Button type="primary" onClick={() => push('/login')}>
           退出
         </Button>
+        <div className="box">=====css-in-js样式====</div>
+        <div className="test">=====less样式====</div>
+        <div className="vars">=====var变量样式====</div>
+        <div className="less-var">=====less变量样式====</div>
       </div>
+      <style jsx>{`
+        .vars {
+          background-color: var(--bdc);
+        }
+      `}</style>
     </div>
   );
 };

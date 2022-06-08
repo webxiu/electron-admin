@@ -42,7 +42,7 @@ const statusObj = {
   },
   [uploadStatus.success]: {
     statusText: '上传成功',
-    color: '#0f0'
+    color: '#15cc15'
   },
   [uploadStatus.fail]: {
     statusText: '上传失败',
@@ -152,7 +152,7 @@ const Media = () => {
 
   return (
     <div>
-      Media
+      <div>批量上传控制</div>
       <Button onClick={onSend}>开始</Button>
       <Button onClick={() => setItemUploadData([])}>清空</Button>
       <div>
@@ -242,7 +242,6 @@ const Media = () => {
           margin: 0 5px;
           font-family: PingFangSC-Medium;
           position: relative;
-          color: #fff;
         }
         .status-text {
           margin-right: 14px;

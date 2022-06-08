@@ -53,3 +53,13 @@ export const shortcutKeyDefaultList: ShortcutKeyItemType[] = [
   { name: '左移', key: 'left', type: 'wave_left', code: '', icon: '', show: false },
   { name: '空格', key: 'space', type: 'wave_space', code: '', icon: '', show: false }
 ];
+
+/** 图谱右键菜单 */
+export const contextMenuList: ShortcutKeyItemType[] = [
+  { name: '标注', key: 'ctrl+n', type: 'addSign', code: '(N)', icon: atlas_sign, show: true },
+  { name: '撤销', key: 'ctrl+z', type: 'undo', code: '(Z)', icon: wave_undo, show: true },
+  { name: '剪切', key: 'ctrl+x', type: 'cut', code: '(X)', icon: wave_cut, show: true },
+  { name: '复制', key: 'ctrl+c', type: 'copy', code: '(C)', icon: wave_copy, show: true },
+  { name: '粘贴', key: 'ctrl+v', type: 'paste', code: '(V)', icon: wave_paste, show: true },
+  { name: '全选', key: 'ctrl+a', type: 'select_all', code: '(A)', icon: '', show: false }
+];

@@ -228,10 +228,11 @@ class Wave extends Component<TProps, TState> {
 
   handleResize: () => void;
   componentDidMount() {
+    const { fileId } = this.props;
+    const { clientRef, contextMenuRef } = this.domRefs;
     this.initCanvas();
     this.loadFile();
-    const { fileId, activeFileId } = this.props;
-    const { clientRef, contextMenuRef } = this.domRefs;
+    this.setState({ mainLoading: true });
     window.addEventListener('resize', this.handleResize);
     window.addEventListener(
       'click',
@@ -391,6 +392,7 @@ class Wave extends Component<TProps, TState> {
     }
     if (this.Maximize) {
       if (activeFileId && fileId === Number(activeFileId)) {
+        this.setState({ mainLoading: true });
         this.initCanvas();
         this.reDraw();
         this.drawSign();
@@ -629,7 +631,6 @@ class Wave extends Component<TProps, TState> {
         // wavecolor
       };
       try {
-        // this.setState({ mainLoading: true });
         waveGraph.getGraphCanvasData({
           ...params,
           cb: (buff) => {
@@ -660,12 +661,13 @@ class Wave extends Component<TProps, TState> {
                 this.isFirstUplod = false;
               }
               resolve(true);
-              // this.setState({ mainLoading: false });
+              this.setState({ mainLoading: false });
             });
           }
         });
       } catch (error) {
-        console.log('drawMainWave Error:', error);
+        this.setState({ mainLoading: false });
+        console.error('drawMainWave Error:', error);
       }
     });
   };
@@ -852,36 +854,40 @@ class Wave extends Component<TProps, TState> {
     const y = clientY - top;
     return { x, y };
   };
+
+  getMsToPx = (nowMs: number) => {
+    const nowPx = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, nowMs, this.state.zoom));
+    return nowPx;
+  };
+
   /** 获取坐标参数 */
   getDirection = (e) => {
+    const { offsetLine } = waveConfig;
     const { x, y } = this.getRealPos(e);
-    const { offsetLine, selectArea } = waveConfig;
-    const startX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, this.selectStartMs, this.state.zoom));
-    const endX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, this.selectEndMs, this.state.zoom));
     const moveMs = this.getNewPxStartMs(x);
-    const moveX = Math.floor(waveUtil.msToPx(this.totalMs, this.mainWaveWidth, moveMs, this.state.zoom));
-
-    // 移动鼠标前后偏差offsetLine个像素对齐(兼容缩放)
-    const inStart = moveX >= startX - offsetLine && moveX <= startX + offsetLine;
-    const inEnd = moveX >= endX - offsetLine && moveX <= endX + offsetLine;
-    const nearPos = inStart || inEnd;
-
-    const nearValue = waveUtil.findNearNum([this.selectStartMs, this.selectEndMs], moveMs);
-    const isAreaColor = this.bgCtx.getImageData(x, y, 1, 1).data[1];
-    const twoColor = Number(selectArea.backgroundColor.split(',')[1]);
-    // 通过选区颜色的第二个颜色值(88)与图谱背景颜色(0),判断鼠标是否在选择线上
-    const moveIn = ![twoColor, 0].includes(isAreaColor) || nearPos;
-
+    let moveIn = false;
     let selectTimeLine: string = '';
-    if (moveIn) {
-      if (this.selectStartMs === this.selectEndMs) {
-        selectTimeLine = 'M';
-      } else if (nearValue === this.selectStartMs) {
-        selectTimeLine = 'L';
-      } else if (nearValue === this.selectEndMs) {
-        selectTimeLine = 'R';
+
+    if (this.selectStartMs > 0 && this.selectEndMs > 0) {
+      const moveX = this.getMsToPx(moveMs);
+      const startX = this.getMsToPx(this.selectStartMs);
+      const endX = this.getMsToPx(this.selectEndMs);
+      // 移动鼠标前后偏差offsetLine个像素对齐(兼容缩放)
+      const inStart = moveX >= startX - offsetLine && moveX <= startX + offsetLine;
+      const inEnd = moveX >= endX - offsetLine && moveX <= endX + offsetLine;
+      moveIn = inStart || inEnd;
+      if (moveIn) {
+        const nearValue = waveUtil.findNearNum([this.selectStartMs, this.selectEndMs], moveMs);
+        if (this.selectStartMs === this.selectEndMs) {
+          selectTimeLine = 'M';
+        } else if (nearValue === this.selectStartMs) {
+          selectTimeLine = 'L';
+        } else if (nearValue === this.selectEndMs) {
+          selectTimeLine = 'R';
+        }
       }
     }
+
     return { x, y, moveIn, selectTimeLine, moveMs };
   };
   /** 仅改变鼠标形状 */
@@ -1083,6 +1089,7 @@ class Wave extends Component<TProps, TState> {
     if (zoom === 100 && zoom === nowZoom) return;
 
     onZoomChange && onZoomChange(nowZoom);
+    this.setState({ mainLoading: true });
     this.setState({ zoom: nowZoom, zoomRatio: `${nowZoom}%` }, () => {
       this.getWaveHead();
       this.mainCtx.clearRect(0, 0, this.mainWaveWidth, this.mainWaveHeight);
@@ -1124,12 +1131,14 @@ class Wave extends Component<TProps, TState> {
     this.signCtx.clearRect(0, 0, this.mainWaveWidth, waveConfig.signConfig.height);
     this.smartSignCtx?.clearRect(0, 0, this.mainWaveWidth, waveConfig.smartSignConfig.height);
     this.signAll.forEach((item) => {
-      const { name, startTime, endTime, isManual } = item;
+      let { name, startTime, endTime, isManual } = item;
       const totalStartX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, startTime, zoom);
       const totalEndX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, endTime, zoom);
       const startX = totalStartX - this.getMainHasMovedX();
       const endX = totalEndX - this.getMainHasMovedX();
       const { color, backgroundColor, height } = isManual ? waveConfig.signConfig : waveConfig.smartSignConfig;
+      name = waveUtil.setTextEllipsis(this.signCtx, name, this.getMsToPx(endTime) - this.getMsToPx(startTime));
+
       if (isManual && signVisible) {
         this.signCtx.fillStyle = color;
         const pox = (endX + startX) / 2 - waveUtil.getNowHeight(this.signCtx.measureText(name).width / 2);
@@ -1370,7 +1379,7 @@ class Wave extends Component<TProps, TState> {
 
   waveAction = utils.debounce((receiveParams) => {
     console.log('receiveParams', receiveParams);
-    const { type, name = 'test', activeFileId } = receiveParams;
+    const { type, name, activeFileId } = receiveParams;
     const { Global, fileId, onSelectAreaChange = noop } = this.props;
     const { copyByteSizeLimit } = waveConfig;
     const positon = this.selectStartMs;
@@ -1535,7 +1544,7 @@ class Wave extends Component<TProps, TState> {
         Global.setRegion({ begin_time: 0, end_time: 0 });
         break;
       }
-      case 'addSign': {
+      case 'wave_addSign': {
         const addSignParams = { startTime: this.selectStartMs, isManual: true, endTime: this.selectEndMs, name };
         this.addSign(addSignParams);
         break;
@@ -1685,7 +1694,7 @@ class Wave extends Component<TProps, TState> {
   }
   onClickContextMenuItem(menu, e) {
     e.preventDefault();
-    if (menu.type === 'addSign') {
+    if (menu.type === 'wave_addSign') {
       this.onAddSign();
     } else {
       this.waveAction({ type: menu.type });
@@ -1748,8 +1757,9 @@ class Wave extends Component<TProps, TState> {
                   onMouseDown={this.onBgDown}
                   onMouseMove={this.onMainMouseMove}
                 />
-                {/* <Spin spinning={mainLoading || scanLoading} style={{ height: '100%' }}></Spin> */}
-                <canvas className="ui-h-100 flex-1" ref={mainWaveRef} style={{ cursor: 'text' }} />
+                <Spin spinning={mainLoading /** || scanLoading */} style={{ height: '100%' }}>
+                  <canvas className="ui-h-100 flex-1" ref={mainWaveRef} style={{ cursor: 'text' }} />
+                </Spin>
                 <div className="wave-context_menu" ref={contextMenuRef}>
                   {contextMenuList?.map((menu) => (
                     <div key={menu.key} className="wave-context_menu-item" onClick={this.onClickContextMenuItem.bind(this, menu)}>

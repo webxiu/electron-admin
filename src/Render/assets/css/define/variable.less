@@ -17,16 +17,20 @@
 @rootFontColor: #fff;
 // 背景色
 @bgColor: #323232;
-// 内容区域背景色
+// 头部背景色
+@headColor: #1890ff;
+// 内容背景色
 @mainColor: #323232;
-
-@menuColor: #585858;
+// 菜单背景色
+@menuColor: #000c17;
 
 @test-color: #f60;
 
 /** 全局变量 使用: color: var(--red); */
 :root {
+  --rootColor: @rootFontColor;
   --bgColor: @bgColor;
+  --headColor: @headColor;
   --mainColor: @mainColor;
   --menuColor: @menuColor;
   --grey: #ccc;
