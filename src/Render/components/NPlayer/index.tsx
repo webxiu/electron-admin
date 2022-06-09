@@ -5,7 +5,6 @@ import React, { RefObject, forwardRef, useCallback, useEffect, useImperativeHand
 import { AppEventNames } from '~/src/Types/EventTypes';
 import PubSub from 'pubsub-js';
 import utils from '@/Render/utils';
-import waveGraph from '~/source/Wave-Graph-X64';
 
 export interface RefType {
   videoInstans: Player | undefined;
@@ -33,14 +32,13 @@ interface Props {
   duration: number;
   /** 播放地址 */
   src: string;
-  /** 预览图5 x 5 的雪碧图，每个雪碧图中小缩略图的尺寸是 160 x 90 */
+  /** 预览图8 x 8 的雪碧图，每个雪碧图中小缩略图的尺寸是 160 x 90 */
   images: string[];
   ref?: RefObject<RefType>;
 }
 
 const NPlayer = forwardRef((props: Props, ref) => {
   const { fileId, src, duration, images } = props;
-  console.log('images', images);
   const videoRef = useRef<Player>();
   const mutedRef = useRef<boolean>(true);
   const renderClock = useRef<boolean>(false);
@@ -53,20 +51,20 @@ const NPlayer = forwardRef((props: Props, ref) => {
 
   useEffect(() => {
     PubSub.subscribe(AppEventNames.WAVE_IS_EDIT, (msg: string, params) => {
-      const { waveId } = params;
-      if (waveId > -1) {
-        const editDepNumber = waveGraph.getEditCurrentDepth(waveId);
-        // ***如果图谱被编辑, 视频设置为静音, 音视频分开播放***
-        if (editDepNumber > 0) {
-          setMuted(false);
-          updateControlItem(true);
-        } else {
-          setMuted(true);
-          updateControlItem(false);
-          videoRef.current?.pause();
-        }
+      const { editDepNum } = params;
+      // ***如果图谱被编辑, 视频设置为静音, 音视频分开播放***
+      if (editDepNum > 0) {
+        setMuted(false);
+        updateControlItem(true);
+      } else {
+        setMuted(true);
+        updateControlItem(false);
+        videoRef.current?.pause();
       }
     });
+    return () => {
+      PubSub.unsubscribe(AppEventNames.WAVE_IS_EDIT);
+    };
   }, [videoRef.current]);
 
   useEffect(() => {
@@ -80,7 +78,6 @@ const NPlayer = forwardRef((props: Props, ref) => {
     });
     return () => {
       PubSub.unsubscribe(AppEventNames.CONTROL_VIDEO);
-      PubSub.unsubscribe(AppEventNames.WAVE_IS_EDIT);
     };
   }, [src, images]);
 

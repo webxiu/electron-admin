@@ -64,28 +64,16 @@ const Media = () => {
 
   /** 文件路径列表或文件列表 */
   const onSend = () => {
-    const dataList: UploadItemType[] = [
-      { uuid: uuidv4(), method: 'GET', title: '1数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '2数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '3数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '4数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '5数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '6数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '7数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '8数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '9数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '10数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '11数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '12数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '13数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '14数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '15数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '16数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '17数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '18数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '19数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting },
-      { uuid: uuidv4(), method: 'GET', title: '20数据接口', url: 'https://api.gugudata.com/news/joke/demo', status: uploadStatus.waiting }
-    ];
+    const renderArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    const dataList: UploadItemType[] = renderArr.map((item, i) => {
+      return {
+        uuid: uuidv4(),
+        method: 'GET',
+        title: i + '数据接口',
+        url: 'https://api.gugudata.com/news/joke/demo',
+        status: uploadStatus.waiting
+      };
+    });
     onStart(dataList);
   };
   /** 文件路径列表或文件列表 */

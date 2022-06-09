@@ -728,19 +728,10 @@ class Wave extends Component<TProps, TState> {
     const { playing, zoom } = this.state;
     let playStartMs = this.audio.currentTime * 1000;
     const playEndMs = this.playList[this.playIndex].endTime;
-    this.setState({ playCurrentTime: playStartMs });
-    const playX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, playStartMs, zoom);
-    if (playStartMs >= playEndMs) {
-      this.playIndex++;
-      if (this.playIndex === this.playList.length) {
-        this.pause();
-        this.onControlVideo(VIDEO_STATUS.pause, { currentTime: playStartMs / 1000 });
-        return;
-      }
-      playStartMs = this.playList[this.playIndex].startTime;
-      this.audio.currentTime = playStartMs / 1000;
-      this.onControlVideo(VIDEO_STATUS.play, { currentTime: playStartMs / 1000 });
-    }
+    const playMs = playStartMs >= playEndMs ? playEndMs : playStartMs;
+    const playX = waveUtil.msToPx(this.totalMs, this.mainWaveWidth, playMs, zoom);
+
+    this.setState({ playCurrentTime: playMs });
     this.animationId = window.requestAnimationFrame(async () => {
       const hasMovedX = this.getMainHasMovedX();
       if (playX - hasMovedX > this.mainWaveWidth) {
@@ -756,16 +747,32 @@ class Wave extends Component<TProps, TState> {
       this.drawMultiSelectArea();
       this.drawSelectArea(this.selectStartMs, this.selectEndMs, this.isManual, false);
       this.drawTimeLine(playX - hasMovedX, false);
-      /** playStartMs 会先播放一次才判断,所以此处给个比0秒稍大的值, hasMovedX:判断大于0的任意值均可,代表有放大区域移动 */
+      /**
+       * 播放结束, 再播放回到开始位置,
+       * playStartMs  当前播放的时间, 设置0秒稍大的值,
+       * hasMovedX: 设置大于0的任意值均可,代表有放大区域
+       */
       if (playStartMs < 2 && hasMovedX > 10) {
         this.drawScanSlider(0);
         this.drawXAxis(0);
         this.drawMainWave(0);
       }
-      this.drawPlay();
       if (zoom !== 100) {
         this.drawSign();
       }
+      /** 播放停止条件 */
+      if (playStartMs >= playEndMs) {
+        this.playIndex++;
+        if (this.playIndex === this.playList.length) {
+          this.pause();
+          this.onControlVideo(VIDEO_STATUS.pause, { currentTime: playStartMs / 1000 });
+          return;
+        }
+        playStartMs = this.playList[this.playIndex].startTime;
+        this.audio.currentTime = playStartMs / 1000;
+        this.onControlVideo(VIDEO_STATUS.play, { currentTime: playStartMs / 1000 });
+      }
+      this.drawPlay();
     });
   };
 
@@ -1554,7 +1561,7 @@ class Wave extends Component<TProps, TState> {
         break;
       }
       case 'deleteSign': {
-        this.deleteSign(activeFileId);
+        this.deleteSign(receiveParams.id);
         break;
       }
       case 'wave_right': {
@@ -1574,9 +1581,10 @@ class Wave extends Component<TProps, TState> {
     }
   }, 30);
 
-  /** 音频编辑时发送waveId给视频,获取是否编辑 */
+  /** 获取音频编辑深度 */
   onEditWaveGraph() {
-    PubSub.publish(AppEventNames.WAVE_IS_EDIT, { waveId: this.waveId });
+    const editDepNum = waveGraph.getEditCurrentDepth(this.waveId);
+    PubSub.publish(AppEventNames.WAVE_IS_EDIT, { editDepNum });
   }
 
   /** 更新音频buffer */

@@ -1,21 +1,18 @@
 import './index.less';
 
 import { MarkVoice, OpenType } from '@/Render/components/Wave/components/MarkVoice';
-import React, { RefObject, forwardRef, useRef, useState } from 'react';
+import React, { RefObject, useRef, useState } from 'react';
 import Wave, { SignProps } from '@/Render/components/Wave';
 import { contextMenuList, shortcutKeyList } from '@/Render/config/wave.config';
 
 import { AppEventNames } from '~/src/Types/EventTypes';
-import { Button } from 'antd';
-import Mousetrap from 'mousetrap';
 import NPlayer from '@/Render/components/NPlayer';
 import ShortcutKeyMenu from '@/Render/components/Wave/components/ShortcutKeyMenu';
 import WaveHeader from '@/Render/components/Wave/components/WaveHeader';
+import { message } from 'antd';
 import path from 'path';
 import { useHistory } from 'react-router';
 import utils from '@/Render/utils/index';
-
-// import NPlayer from './NPlayer';
 
 let rootPath = path.join(process.cwd(), '/public');
 if (rootPath.includes('app.asar') || rootPath.includes('app')) {
@@ -77,14 +74,22 @@ const Wrap: React.FC = () => {
   }, [activeFileId, selectTime, voiceInfo]);
 
   const getTimes = (totalTime: number) => {};
-  const onSelectAreaChange = (start: number, end: number) => {};
   const onWaveFinish = (params) => {};
 
   console.log('voiceInfo', voiceInfo);
 
+  /** 音频选中部分区域 */
+  const onSelectAreaChange = (start: number, end: number) => {
+    setSelectTime({ startTime: start, endTime: end });
+  };
+
   /** @Nav防抖的触发事件 */
   const onWaveHandle = utils.debounce((type: string) => {
-    PubSub.publish(AppEventNames.WAVE_ACTION, { activeFileId, type: type });
+    let eventName = AppEventNames.WAVE_ACTION as string;
+    if (type === 'wave_addSign') {
+      eventName = `ADD_SIGN_${voiceInfo.voiceid}`;
+    }
+    PubSub.publish(eventName, { activeFileId, type: type });
   }, 500);
 
   const [zoomRatio, setZoomRatio] = useState<string | number>(100);
@@ -112,19 +117,19 @@ const Wrap: React.FC = () => {
 
   const onSubmitSign = (value) => {
     if (mark.title === '新增标注') {
-      PubSub.publish(`WAVE_ACTION_${activeFileId}`, { activeFileId, type: 'wave_addSign', name: value.content });
+      PubSub.publish(AppEventNames.WAVE_ACTION, { activeFileId, type: 'wave_addSign', name: value.content });
     } else if (mark.title === '查看编辑') {
-      PubSub.publish(`WAVE_ACTION_${activeFileId}`, { ...selectSign, activeFileId, type: 'editSign', name: value.content });
+      PubSub.publish(AppEventNames.WAVE_ACTION, { ...selectSign, activeFileId, type: 'editSign', name: value.content });
     } else if (mark.title === '查看更多') {
       if (value.content) {
-        PubSub.publish(`WAVE_ACTION_${activeFileId}`, { activeFileId, type: 'wave_addSign', name: value.content });
+        PubSub.publish(AppEventNames.WAVE_ACTION, { activeFileId, type: 'wave_addSign', name: value.content });
       }
     }
     markRef.current?.onCancel();
   };
 
   const onDeleteSign = () => {
-    PubSub.publish(`WAVE_ACTION_${activeFileId}`, { activeFileId, type: 'deleteSign', id: selectSign.id });
+    PubSub.publish(AppEventNames.WAVE_ACTION, { activeFileId, type: 'deleteSign', id: selectSign.id });
     markRef.current?.onCancel();
   };
 
