@@ -1,8 +1,8 @@
 import './index.less';
 
+import { Button, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 
-import { Button } from 'antd';
 import clipboardXh from '~/source/batch-clipboard-xh';
 import { useHistory } from 'react-router';
 
@@ -57,6 +57,7 @@ const Wrap: React.FC = () => {
     console.log('clipboardXh', clipboardXh.readFilePaths());
   };
 
+  console.log('window', window);
   return (
     <div>
       <div className="box">
@@ -64,14 +65,18 @@ const Wrap: React.FC = () => {
         <Button type="primary" onClick={onRead}>
           读取剪切板
         </Button>
+        <Tag color="success">success</Tag>
+        <Tag color="processing">processing</Tag>
+        <Tag color="error">error</Tag>
+        <Tag color="warning">warning</Tag>
+        <Tag color="default">default</Tag>
         <hr />
-        <Button type="primary" onClick={() => push('/login')}>
-          退出
-        </Button>
+        <Button onClick={() => push('/login')}>退出</Button>
         <div className="box">=====css-in-js样式====</div>
         <div className="test">=====less样式====</div>
         <div className="vars">=====var变量样式====</div>
         <div className="less-var">=====less变量样式====</div>
+        <div className="test-img">=====less变量样式====</div>
       </div>
       <style jsx>{`
         .vars {

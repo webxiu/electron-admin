@@ -1,3 +1,9 @@
+# 生成主题前缀
+
+```js
+lessc --js --modify-var="ant-prefix=custom" node_modules/antd/dist/antd.variable.less  src/Render/assets/css/antd/custom.less
+```
+
 # electron-quick-start
 
 **Clone and run for a quick way to see Electron in action.**

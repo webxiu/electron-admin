@@ -1,6 +1,7 @@
 const Core = require('../../core');
 const config = require('../../../../config');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { getThemeVariables } = require('antd/dist/theme');
 
 module.exports = {
   module: {
@@ -77,14 +78,13 @@ module.exports = {
                 ['@babel/plugin-syntax-dynamic-import'],
                 ['@babel/plugin-transform-runtime'],
                 ['styled-jsx/babel'],
-                ['babel-plugin-import', { libraryName: 'antd', libraryDirectory: 'es', style: true }],
+                // ['babel-plugin-import', { libraryName: 'antd', libraryDirectory: 'es', style: true }],
                 Core.isPro() ? null : ['react-refresh/babel']
               ].filter(Boolean)
             }
           }
         ]
       },
-
       {
         test: /\.(woff|woff2|eot|ttf)$/,
         exclude: [Core.JoinCwd('node_modules')],
@@ -181,7 +181,11 @@ module.exports = {
             options: {
               sourceMap: true,
               lessOptions: {
-                javascriptEnabled: true
+                javascriptEnabled: true,
+                // modifyVars: getThemeVariables({
+                //   dark: true, // 开启暗黑模式
+                //   compact: true, // 开启紧凑模式
+                // }),
               }
             }
           },
@@ -203,7 +207,7 @@ module.exports = {
       /** 项目全局 css 样式，没有 modules */
       {
         test: /\.(css)$/,
-        include: [Core.JoinCwd('src', 'Render', 'assets', 'css')],
+        // include: [Core.JoinCwd('src', 'Render', 'assets', 'css'), Core.JoinCwd('src', 'Render', 'routes')],
         use: [
           Core.isPro() ? MiniCssExtractPlugin.loader : 'style-loader',
           'css-loader',

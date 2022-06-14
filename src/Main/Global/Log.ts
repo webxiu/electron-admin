@@ -67,9 +67,9 @@ const Log = (logPath) => {
   };
 
   return {
-    info: (isPro && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('info', message, ...logs)))) || console.info,
-    error: (isPro && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('error', message, ...logs)))) || console.info,
-    warn: (isPro && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('warn', message, ...logs)))) || console.info
+    info: (isPro() && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('info', message, ...logs)))) || console.info,
+    error: (isPro() && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('error', message, ...logs)))) || console.info,
+    warn: (isPro() && ((message, ...logs) => BaseSaveConsole(BaseTransfromConsole('warn', message, ...logs)))) || console.info
   };
 };
 

@@ -1,3 +1,4 @@
+@import 'theme/index.less';
 @import 'define/index.less';
 @import 'antd/theme.less';
 
@@ -34,8 +35,14 @@ body,
   transition: all 500ms;
 }
 
-body {
-
+body { 
+  .test-url{ 
+    // background: url('../../assets/img/logo.png'); 
+    width: 80px;
+    height: 80px;
+    border: 1px solid #000;
+  }
+   
   /*
     ::-webkit-scrollbar — 整个滚动条.
     ::-webkit-scrollbar-button — 滚动条上的按钮 (上下箭头).
