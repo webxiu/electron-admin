@@ -29,7 +29,7 @@ export const Wrap: React.FC<Props> = (props) => {
   return useObserver(() => (
     <div className="flex-col ui-h-100">
       <div className="flex-1">
-        <Menu defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} mode="inline" items={menuItems} />
+        <Menu defaultSelectedKeys={['1']} theme="light" defaultOpenKeys={['sub1']} mode="inline" items={menuItems} />
       </div>
 
       <style jsx>{``}</style>

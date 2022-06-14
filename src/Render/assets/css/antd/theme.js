@@ -1017,9 +1017,9 @@
  */
 module.exports = {
   // Colors
-  // '@primary-color': '#1890ff',
-  // '@normal-color': '#1890ff',
-  // '@label-color': '#fff',
+  '@primary-color': '#1890ff',
+  '@normal-color': '#1890ff',
+  '@label-color': '#fff',
   // Popover
   // '@popover-bg': '#1c1c24',
   // '@popover-color': '#ffffff',
@@ -1028,9 +1028,9 @@ module.exports = {
   // '@table-header-color': '#ffffff',
   // '@table-row-hover-bg': 'rgba(0, 0, 0, 0.4)'
   // Input
-  // '@input-bg': '#fff',
-  // '@input-color': '#AAB0B7',
-  // '@input-border-color': '#F5F6FA'
+  '@input-bg': '#fff',
+  '@input-color': '#AAB0B7',
+  '@input-border-color': '#F5F6FA'
   // picker
   // '@picker-bg': '051B37',
   // @picker-basic-cell-hover-color: @item-hover-bg,
