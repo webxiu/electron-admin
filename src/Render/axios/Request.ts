@@ -19,6 +19,7 @@ export interface TaskOptionsType<T> {
 }
 
 class Request<T extends { uuid?: string; url: string; method?: Method }> {
+  private requestOptions: AxiosRequestConfig;
   private result: AxiosResponse<any>[] = []; //结果数组
   private taskList: T[] = []; //所有任务队列
   private taskQueue: T[] = []; // 所有待执行任务队列
@@ -35,6 +36,7 @@ class Request<T extends { uuid?: string; url: string; method?: Method }> {
     const { taskList, limit = 5 } = fileData;
     this.taskList = taskList;
     this.limit = limit;
+    this.requestOptions = options ?? {};
     this.preStart();
   }
 
@@ -57,7 +59,8 @@ class Request<T extends { uuid?: string; url: string; method?: Method }> {
           cancelToken: new axios.CancelToken((cancel) => {
             this.Canceler = cancel;
             this._onCancelToken && this._onCancelToken(task.uuid, cancel);
-          })
+          }),
+          ...this.requestOptions
         })
         .then((res) => {
           this.result.push(res.data);

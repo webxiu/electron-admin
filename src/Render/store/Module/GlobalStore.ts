@@ -1,4 +1,4 @@
-import { action, observable, runInAction } from 'mobx';
+import { action, configure, observable, runInAction } from 'mobx';
 
 interface UserInfoType {
   username: string;

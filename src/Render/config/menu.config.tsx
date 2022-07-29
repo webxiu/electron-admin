@@ -1,4 +1,5 @@
 import {
+  ApartmentOutlined,
   AppstoreOutlined,
   ContainerOutlined,
   DesktopOutlined,
@@ -43,6 +44,12 @@ export const menuItems: MenuItem[] = [
     label: <a href="/#/home/stretch">布局</a>,
     key: 'stretch',
     icon: <PieChartOutlined />,
+    type: undefined
+  },
+  {
+    label: <a href="/#/home/flowchart">流程图</a>,
+    key: 'flowchart',
+    icon: <ApartmentOutlined />,
     type: undefined
   },
   {

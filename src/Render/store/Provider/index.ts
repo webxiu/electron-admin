@@ -9,7 +9,11 @@ import { configure } from 'mobx';
 /** ============== 如果对 mobx 数据结构不熟悉，会在开发中造成错觉 ============== */
 
 /** ============== 严格模式 不允许在动作之外进行状态修改 ============== */
-configure({ enforceActions: 'observed' });
+// configure({ enforceActions: 'observed' });
+
+configure({
+  enforceActions: 'never'
+});
 /** ============== 严格模式 不允许在动作之外进行状态修改 ============== */
 
 const ProviderProps = { ...StoreList };

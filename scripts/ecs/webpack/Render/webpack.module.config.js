@@ -203,7 +203,7 @@ module.exports = {
       /** 项目全局 css 样式，没有 modules */
       {
         test: /\.(css)$/,
-        include: [Core.JoinCwd('src', 'Render', 'assets', 'css')],
+        // include: [Core.JoinCwd('src', 'Render', 'assets', 'css')],
         use: [
           Core.isPro() ? MiniCssExtractPlugin.loader : 'style-loader',
           'css-loader',

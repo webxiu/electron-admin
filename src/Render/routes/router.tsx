@@ -58,6 +58,7 @@ export const RootRouter = () => (
       <Route path="/home/onestop" exact component={lazy(() => import('@/Render/pages/Home/OneStop'))}></Route>
       <Route path="/home/media" exact component={lazy(() => import('@/Render/pages/Home/Media'))}></Route>
       <Route path="/home/stretch" exact component={lazy(() => import('@/Render/pages/Home/Stretch'))}></Route>
+      <Route path="/home/flowchart" exact component={lazy(() => import('@/Render/pages/Home/FlowChart'))}></Route>
     </Layout>
   </PackingWithAuth>
 );
